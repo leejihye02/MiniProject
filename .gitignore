@@ -1,0 +1,8 @@
+# Constants
+src/common/Constants.java
+
+# bin
+bin/
+
+.classpath
+.project
