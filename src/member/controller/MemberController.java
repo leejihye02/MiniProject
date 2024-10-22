@@ -33,7 +33,7 @@ public class MemberController {
 				break;
 	
 			case "2": // 구인회사 회원가입
-//				companyCtrl.register(sc);
+				companyCtrl.register(sc);
 				break;
 	
 			case "0": // 돌아가기
@@ -75,7 +75,7 @@ public class MemberController {
 			case "3": // 관리자 로그인
 				AdminDTO adminDTO = adminCtrl.login(sc);
 				if(adminDTO != null) {
-					adminCtrl.adminMenu(adminDTO, sc);
+					//adminCtrl.adminMenu(adminDTO, sc);
 				}
 				break;
 			
