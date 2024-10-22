@@ -64,7 +64,23 @@ public class ValidationUtil {
 	public static boolean isYNValid(String yn) {
 		// y 또는 n 이 아닌 경우 경고 문구 출력
 		if(!("y".equalsIgnoreCase(yn) || "n".equalsIgnoreCase(yn))) {
-			System.out.println("\n>> [경고] 입력값은 대소문자 구분없이 y 또는 n으로 입력해야 합니다. <<");
+			System.out.println(">> [경고] 입력값은 대소문자 구분없이 y 또는 n으로 입력해야 합니다. <<\n");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/*
+	 * 문자열이 숫자인지 검사
+	 */
+	public static boolean isNumberValid(String number) {
+		String regex = "[0-9]";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(number);
+
+		if (!matcher.find()) {
+			System.out.println(">> [경고] 입력값은 숫자로 입력해야 합니다. <<\n");
 			return false;
 		}
 		
