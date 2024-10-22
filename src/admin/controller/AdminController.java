@@ -8,6 +8,7 @@ import admin.domain.AdminDTO;
 import admin.model.AdminDAO;
 import admin.model.AdminDAO_imple;
 import notification.controller.NotificationController;
+import utils.Msg;
 
 /*
  * 관리자 컨트롤러
@@ -38,7 +39,7 @@ public class AdminController {
 
 			// 아이디, 비밀번호 공백 검사
 			if (adminId.isBlank() || passwd.isBlank()) {
-				System.out.println(">> [경고] 아이디 및 비밀번호는 공백이 될 수 없습니다. <<\n");
+				Msg.W("아이디 및 비밀번호는 공백이 될 수 없습니다.");
 				continue;
 			}
 
@@ -52,7 +53,7 @@ public class AdminController {
 			adminDTO = adminDAO.login(loginMap);
 
 			if (adminDTO == null) {
-				System.out.println(">> [경고] 아이디 또는 비밀번호가 일치하지 않습니다. <<\n");
+				Msg.W("아이디 또는 비밀번호가 일치하지 않습니다.");
 				continue;
 			}
 
@@ -93,7 +94,7 @@ public class AdminController {
 				break;
 			}
 			default:
-				System.out.println(">> [경고] 메뉴에 없는 번호입니다. <<\n");
+				Msg.W("메뉴에 없는 번호입니다.");
 			}
 		} while (!"0".equals(menu));
 	}
