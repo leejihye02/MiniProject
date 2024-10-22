@@ -1,0 +1,15 @@
+package company.model;
+
+import java.util.Map;
+
+import company.domain.CompanyDTO;
+
+public interface companyDAO {
+
+	//회원가입 메소드
+	int register(CompanyDTO companyDTO);
+
+	//로그인 메소드
+	CompanyDTO login(Map<String, String> paraMap);
+
+}
