@@ -21,8 +21,9 @@ public class ValidationUtil {
 		String regex = null;
 		Matcher matcher = null;
 		
-		// 비밀번호의 최대길이가 20글자를 넘어가면 false 반환
-		if(passwd.isBlank() || passwd.length() > 20) {
+		// 비밀번호가 공백, 비밀번호의 길이가 8글자 미만, 20글자 초과면 false 반환
+		if(passwd.isBlank() || passwd.length() < 8 || passwd.length() > 20) {
+			Msg.W("비밀번호는 공백으로 입력할 수 없으며, 8글자 이상, 20글자 이하여야 합니다.");
 			return false;
 		}
 
@@ -32,6 +33,7 @@ public class ValidationUtil {
 		matcher = pattern.matcher(passwd);
 
 		if (!matcher.find()) {
+			Msg.W("비밀번호에 영문이 반드시 포함되어야 합니다.");
 			return false;
 		}
 
@@ -41,6 +43,7 @@ public class ValidationUtil {
 		matcher = pattern.matcher(passwd);
 
 		if (!matcher.find()) {
+			Msg.W("비밀번호에 숫자가 반드시 포함되어야 합니다.");
 			return false;
 		}
 
@@ -50,6 +53,69 @@ public class ValidationUtil {
 		matcher = pattern.matcher(passwd);
 
 		if (!matcher.find()) {
+			Msg.W("비밀번호에 특수문자가 반드시 포함되어야 합니다.");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/*
+	 * 아이디 유효성 검사 메소드 
+	 * 아이디의 길이는 5글자 이상, 20글자 이하
+	 * blank를 허용하지 않음
+	 * 아이디는 영문, 숫자로만 이뤄져야 한다.
+	 * 조건을 만족하면 true, 아니면 false 반환
+	 */
+	public static boolean isIDValid(String id) {
+		Pattern pattern = null;
+		String regex = null;
+		Matcher matcher = null;
+		
+		// 공백, 5글자 미만, 20초과면 false 반환
+		if (id.isBlank() || id.length() < 5 || id.length() > 30) {
+			Msg.W("아이디는 공백으로 입력할 수 없으며, 5글자 이상 30글자 이하여야 합니다.");
+			return false;
+		}
+
+		// 영문, 숫자로만 이루어져있지 않으면 false 반환
+		regex = "[^a-zA-Z0-9]"; // 알파벳, 숫자, 한자, 공백을 제외한 문자는 특수문자로 간주
+		pattern = Pattern.compile(regex);
+		matcher = pattern.matcher(id);
+
+		if (matcher.find()) {
+			Msg.W("아이디는 영문 또는 숫자만 입력 가능합니다.");
+			return false;
+		}
+		
+		return true;
+	}
+
+	/*
+	 * 성명 유효성 검사 메소드 
+	 * 성명의 길이는 1글자 이상, 10글자 이하
+	 * blank를 허용하지 않음
+	 * 아이디는 영문, 숫자로만 이뤄져야 한다.
+	 * 조건을 만족하면 true, 아니면 false 반환
+	 */
+	public static boolean isEmailValid(String email) {
+		Pattern pattern = null;
+		String regex = null;
+		Matcher matcher = null;
+		
+		// 공백, 40글자 초과면 false 반환
+		if (email.isBlank() || email.length() > 40) {
+			Msg.W("아이디는 공백으로 입력할 수 없으며, 5글자 이상 30글자 이하여야 합니다.");
+			return false;
+		}
+		
+		// 이메일에 @가 없으면 false
+		regex = "[@]"; // 알파벳, 숫자, 한자, 공백을 제외한 문자는 특수문자로 간주
+		pattern = Pattern.compile(regex);
+		matcher = pattern.matcher(email);
+
+		if (!matcher.find()) {
+			Msg.W("이메일은 id@example.com 형식으로 입력해야 합니다.");
 			return false;
 		}
 		
@@ -64,7 +130,7 @@ public class ValidationUtil {
 	public static boolean isYNValid(String yn) {
 		// y 또는 n 이 아닌 경우 경고 문구 출력
 		if(!("y".equalsIgnoreCase(yn) || "n".equalsIgnoreCase(yn))) {
-			System.out.println(">> [경고] 입력값은 대소문자 구분없이 y 또는 n으로 입력해야 합니다. <<\n");
+			Msg.W("입력값은 대소문자 구분없이 y 또는 n으로 입력해야 합니다.");
 			return false;
 		}
 		
@@ -80,7 +146,7 @@ public class ValidationUtil {
 		Matcher matcher = pattern.matcher(number);
 
 		if (!matcher.find()) {
-			System.out.println(">> [경고] 입력값은 숫자로 입력해야 합니다. <<\n");
+			Msg.W("입력값은 숫자로 입력해야 합니다.");
 			return false;
 		}
 		
