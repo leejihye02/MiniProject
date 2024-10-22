@@ -164,18 +164,32 @@ public class ValidationUtil {
 	}
 	
 	/*
-	 * 문자열이 숫자인지 검사
+	 * 문자열이 숫자로만 이루어져 있는지 검사
 	 */
 	public static boolean isNumberValid(String number) {
+		boolean valid = true;
 		String regex = "[0-9]";
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcher = pattern.matcher(number);
 
+		// 숫자가 전혀 포함되지 않는 경우
 		if (!matcher.find()) {
-			Msg.W("입력값은 숫자로 입력해야 합니다.");
-			return false;
+			valid = false;
 		}
 		
-		return true;
+		// 숫자가 아닌 문자가 포함된 경우
+		regex = "[^0-9]";
+		pattern = Pattern.compile(regex);
+		matcher = pattern.matcher(number);
+		
+		if(matcher.find()) {
+			valid = false;
+		}
+		
+		if(!valid) {
+			Msg.W("입력값은 숫자로 입력해야 합니다.");
+		}
+		
+		return valid;
 	}
 }
