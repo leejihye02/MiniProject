@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 import admin.domain.AdminDTO;
-import admin.domain.AdminLoginDTO;
 import common.ProjectDBConnection;
-
+/*
+ * 관리자와 관련된 DB 데이터 접근 클래스
+ */
 public class AdminDAO_imple implements AdminDAO {
 	
 	private final Connection conn = ProjectDBConnection.getConn(); // DB Connection 객체
@@ -22,7 +24,7 @@ public class AdminDAO_imple implements AdminDAO {
 	 * 관리자 로그인 메소드
 	 */
 	@Override
-	public AdminDTO login(AdminLoginDTO loginDTO) {
+	public AdminDTO login(Map<String, String> loginMap) {
 		AdminDTO adminDTO = new AdminDTO(); // 반환될 AdminDTO 객체 초기화
 		
 		String sql 	= " select admin_id, passwd, name "
@@ -32,13 +34,13 @@ public class AdminDAO_imple implements AdminDAO {
 		try {
 			pstmt = conn.prepareStatement(sql);
 			
-			pstmt.setString(1, loginDTO.getAdmin_id());
-			pstmt.setString(2, loginDTO.getPasswd());
+			pstmt.setString(1, loginMap.get("adminId"));
+			pstmt.setString(2, loginMap.get("passwd"));
 			
 			rs = pstmt.executeQuery();
 			
 			if(rs.next()) {
-				adminDTO.setAdmin_id(rs.getString("admin_id"));
+				adminDTO.setAdminId(rs.getString("admin_id"));
 				adminDTO.setPasswd(rs.getString("passwd"));
 				adminDTO.setName(rs.getString("name"));
 			} else {

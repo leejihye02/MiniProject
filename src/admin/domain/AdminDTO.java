@@ -6,7 +6,7 @@ package admin.domain;
  */
 public class AdminDTO {
 	
-	private String admin_id; // 관리자 아이디
+	private String adminId; // 관리자 아이디
 	
 	private String passwd; // 관리자 비밀번호
 	
@@ -14,12 +14,12 @@ public class AdminDTO {
 	
 	private int status; // 가입 상태 (0 : 탈퇴, 1 : 가입)
 
-	public String getAdmin_id() {
-		return admin_id;
+	public String getAdminId() {
+		return adminId;
 	}
 
-	public void setAdmin_id(String admin_id) {
-		this.admin_id = admin_id;
+	public void setAdminId(String admin_id) {
+		this.adminId = admin_id;
 	}
 
 	public String getPasswd() {
