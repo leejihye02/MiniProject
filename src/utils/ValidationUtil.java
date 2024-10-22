@@ -92,10 +92,10 @@ public class ValidationUtil {
 	}
 
 	/*
-	 * 성명 유효성 검사 메소드 
-	 * 성명의 길이는 1글자 이상, 10글자 이하
+	 * 이메일 유효성 검사 메소드 
+	 * 성명의 길이는 40글자 이하
 	 * blank를 허용하지 않음
-	 * 아이디는 영문, 숫자로만 이뤄져야 한다.
+	 * @가 포함되어야 함
 	 * 조건을 만족하면 true, 아니면 false 반환
 	 */
 	public static boolean isEmailValid(String email) {
@@ -116,6 +116,32 @@ public class ValidationUtil {
 
 		if (!matcher.find()) {
 			Msg.W("이메일은 id@example.com 형식으로 입력해야 합니다.");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/*
+	 * 연락처 유효성 검사 메소드
+	 * XX-XXX-XXXX
+	 * XX-XXXX-XXXX
+	 * XXX-XXX-XXXX
+	 * XXX-XXXX-XXXX 형식이어야 함
+	 * 조건에 맞지 않으면 false
+	 */
+	public static boolean isTelValid(String tel) {
+		Pattern pattern = null;
+		String regex = null;
+		Matcher matcher = null;
+		
+		// 연락처 형식에 맞지 않으면 false
+		regex = "^\\d{2,3}-\\d{3,4}-\\d{4}$"; // 알파벳, 숫자, 한자, 공백을 제외한 문자는 특수문자로 간주
+		pattern = Pattern.compile(regex);
+		matcher = pattern.matcher(tel);
+
+		if (!matcher.find()) {
+			Msg.W("연락처는 XXX-XXXX-XXXX 형식으로 입력해야 합니다.");
 			return false;
 		}
 		
