@@ -2,6 +2,7 @@ package main.controller;
 
 import java.util.Scanner;
 
+import common.ProjectDBConnection;
 import member.controller.MemberController;
 
 public class Main {
@@ -30,7 +31,7 @@ public class Main {
 					break;
 					
 				case "0": // 프로그램 종료
-					
+					ProjectDBConnection.closeConnection();
 					break;
 		
 				default:
