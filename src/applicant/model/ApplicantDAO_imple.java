@@ -22,7 +22,6 @@ public class ApplicantDAO_imple implements ApplicantDAO {
 	private void close() {
 		try {
 			if(rs != null) { rs.close(); rs = null; }
-			
 			if(pstmt != null) { pstmt.close(); pstmt = null; }
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -38,7 +37,7 @@ public class ApplicantDAO_imple implements ApplicantDAO {
 		
 		try {
 			String sql = " insert into tbl_applicant(applicant_id, passwd, email, name, birthday, gender, tel) "
-					   + " values(?, ?, ?, ?, to_date(?, 'yyyymmdd'), ?, ?) ";
+					   + " values(?, ?, ?, ?, to_date(?, 'yyyy-mm-dd'), ?, ?) ";
 			
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1,  applicantDTO.getApplicantId());
@@ -58,7 +57,7 @@ public class ApplicantDAO_imple implements ApplicantDAO {
 		}
 		
 		return result;
-	}// end of public int memberRegister(MemberDTO member)------------------
+	}// end of public int register(ApplicantDTO applicantDTO)------------------
 	
 	
 	// === 로그인 === //
