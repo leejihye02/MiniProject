@@ -23,6 +23,25 @@ public class NotificationDAO_imple implements NotificationDAO {
 	private ResultSet rs; // 쿼리 결과를 담을 객체
 
 	/*
+	 * 자원 해제
+	 */
+	private void close() {
+		try {
+			if (pstmt != null) {
+				pstmt.close();
+				pstmt = null;
+			}
+
+			if (rs != null) {
+				rs.close();
+				rs = null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/*
 	 * 공지사항 리스트 반환
 	 */
 	@Override
@@ -41,11 +60,11 @@ public class NotificationDAO_imple implements NotificationDAO {
 			while (rs.next()) {
 				NotificationDTO notificationDTO = new NotificationDTO();
 				notificationDTO.setNotificationId(rs.getInt("notification_id"));
-				
-				if(isAdmin) {
+
+				if (isAdmin) {
 					notificationDTO.setAdminName(rs.getString("name"));
 				}
-				
+
 				notificationDTO.setTitle(rs.getString("title"));
 				notificationDTO.setRegisterday(rs.getString("registerday"));
 				notificationDTO.setFix(rs.getInt("fix"));
@@ -55,6 +74,8 @@ public class NotificationDAO_imple implements NotificationDAO {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			close();
 		}
 
 		return noticeList;
@@ -82,6 +103,8 @@ public class NotificationDAO_imple implements NotificationDAO {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			close();
 		}
 
 		return result;
@@ -107,10 +130,10 @@ public class NotificationDAO_imple implements NotificationDAO {
 
 			if (rs.next()) {
 				notificationDTO.setNotificationId(rs.getInt("notification_id"));
-				
+
 				// 관리자인 경우에만 관리자명 저장
-				if(isAdmin) {
-					notificationDTO.setAdminName(rs.getString("name"));					
+				if (isAdmin) {
+					notificationDTO.setAdminName(rs.getString("name"));
 				}
 
 				notificationDTO.setTitle(rs.getString("title"));
@@ -123,10 +146,12 @@ public class NotificationDAO_imple implements NotificationDAO {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			close();
 		}
 		return notificationDTO;
 	}
-	
+
 	/*
 	 * 공지사항 수정
 	 */
@@ -134,8 +159,8 @@ public class NotificationDAO_imple implements NotificationDAO {
 	public int updateNotification(Map<String, String> noticeMap) {
 		int result = 0; // DML 쿼리 결과
 
-		String sql 	= " update tbl_notification set title = ?, contents = ?, fix = ?, updateday = sysdate "
-					+ " where notification_id = ? and is_delete = 0 ";
+		String sql = " update tbl_notification set title = ?, contents = ?, fix = ?, updateday = sysdate "
+				+ " where notification_id = ? and is_delete = 0 ";
 
 		try {
 			pstmt = conn.prepareStatement(sql);
@@ -149,35 +174,38 @@ public class NotificationDAO_imple implements NotificationDAO {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			close();
 		}
 
 		return result;
 	}
 
 	/*
-	 * 공지사항 유무 확인
-	 * 공지사항 ID를 통해 해당 공지사항이 존재하면 1, 존재하지 않으면 0을 반환
+	 * 공지사항 유무 확인 공지사항 ID를 통해 해당 공지사항이 존재하면 1, 존재하지 않으면 0을 반환
 	 */
 	@Override
 	public int selectCountNotification(int notificationId) {
 		int result = 0;
 		String sql = " select count(*) as count from tbl_notification where notification_id = ? ";
-		
+
 		try {
 			pstmt = conn.prepareStatement(sql);
 
 			pstmt.setInt(1, notificationId);
 
 			rs = pstmt.executeQuery();
-			
+
 			rs.next();
-			
+
 			result = rs.getInt("count");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			close();
 		}
-		
+
 		return result;
 	}
 
@@ -198,8 +226,10 @@ public class NotificationDAO_imple implements NotificationDAO {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			close();
 		}
-		
+
 		return result;
 	}
 }

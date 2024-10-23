@@ -1,5 +1,6 @@
 package applicant.model;
 
+import java.util.List;
 import java.util.Map;
 
 import applicant.domain.ApplicantDTO;
@@ -11,5 +12,17 @@ public interface ApplicantDAO {
 	
 	// === 로그인 === //
 	ApplicantDTO login(Map<String, String> paraMap);
+
+	// == 성명으로 구직자 목록 조회 == //
+	public List<ApplicantDTO> getApplicantListByName(String name);
+
+	// == 나이대로 구직자 목록 조회 == //
+	public List<ApplicantDTO> getApplicantListByAgeline(String ageline);
+
+	// == 구직자 아이디로 구직자 조회 == //
+	public ApplicantDTO getApplicantById(String applicantId);
+
+	// == 구직자 차단 관리 == //
+	public int blockApplicant(String applicantId, boolean block);
 
 }
