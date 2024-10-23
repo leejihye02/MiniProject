@@ -5,5 +5,9 @@ public class Msg {
 		System.out.println(">> [경고] " + msg + " <<\n");
 	}
 	
+	public static void N(String msg){
+		System.out.println(">> " + msg + " <<\n");
+	}
+	
 	private Msg() {}
 }
