@@ -1,4 +1,4 @@
-package apply.model;
+package job.model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,10 +7,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import apply.domain.ApplyDTO;
 import common.ProjectDBConnection;
+import job.domain.JobDTO;
 
-public class ApplyDAO_imple implements ApplyDAO {
+
+public class JobDAO_imple implements JobDAO {
 
 	// field, attribute, property, 속성
 	private Connection conn = ProjectDBConnection.getConn();
@@ -18,7 +19,7 @@ public class ApplyDAO_imple implements ApplyDAO {
 	private ResultSet rs;
 
 	
-	
+		
 	// method, operation, 기능
 	
 	// === 자원반납을 해주는 메소드 === //
@@ -31,23 +32,37 @@ public class ApplyDAO_imple implements ApplyDAO {
 	
 	
 	
-	// === 입자지원자 목록을 보여주는 메소드 === //
+	// *** 희망직종 목록을 보여주는 메소드 *** //
 	@Override
-	public List<ApplyDTO> applyList() {
-
-		List<ApplyDTO> ApplyList = new ArrayList<>();
+	public List<JobDTO> jobList() {
+		
+		List<JobDTO> jobList = new ArrayList<>();
 		
 		try {
 			
-			String sql = "  ";
+			String sql = " select job_id, name from TBL_JOB order by 1 ";
+			
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) { 
+				JobDTO jobdto = new JobDTO();
+				jobdto.setJob_id(rs.getInt("job_id"));
+				jobdto.setName(rs.getString("name"));
+				
+				jobList.add(jobdto);
+			}
+			
 			
 		} catch(SQLException e) {
 			e.printStackTrace();
 		} finally {
 			close();
 		}
+		return jobList;
 		
-		return null;
-	}
-
+	} // end of public void jobList()-----------
+	
+	
+	
 }
