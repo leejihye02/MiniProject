@@ -18,8 +18,26 @@ public class AdminDAO_imple implements AdminDAO {
 	private PreparedStatement pstmt; // 쿼리 실행 객체
 	
 	private ResultSet rs; // 쿼리 결과를 담을 객체
-	
 
+	/*
+	 * 자원 해제
+	 */
+	private void close() {
+		try {
+			if (pstmt != null) {
+				pstmt.close();
+				pstmt = null;
+			}
+
+			if (rs != null) {
+				rs.close();
+				rs = null;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/*
 	 * 관리자 로그인 메소드
 	 */
@@ -50,6 +68,8 @@ public class AdminDAO_imple implements AdminDAO {
 		} catch (SQLException e) {
 			// TODO SQL 공통 예외처리 구상 필요
 			e.printStackTrace();
+		} finally {
+			close();
 		}
 
 		return adminDTO;
