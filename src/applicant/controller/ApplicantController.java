@@ -8,7 +8,9 @@ import java.util.Scanner;
 
 import applicant.domain.ApplicantDTO;
 import applicant.model.*;
-import review.controller.ReviewController;
+import resume.controller.Resumecontroller;
+import resume.domain.ResumeDTO;
+//import review.controller.ReviewController;
 import utils.Msg;
 import utils.ValidationUtil;
 
@@ -163,6 +165,9 @@ public class ApplicantController {
 			
 			case "2": // 이력서 관리
 				// 이상우
+				ResumeDTO resumeDTO = new ResumeDTO();
+				Resumecontroller resumecontroller= new Resumecontroller();
+				resumecontroller.list_Resume(applicant); //구직자DTO를 인자값으로 넘기면 됨
 				break;
 			
 			case "3": // 구인회사 찾기
@@ -178,8 +183,8 @@ public class ApplicantController {
 				break;
 			
 			case "6": // 리뷰 작성 - 김규빈
-				ReviewController reviewCtrl = new ReviewController();
-				reviewCtrl.reviewMenu(applicant, sc);
+//				ReviewController reviewCtrl = new ReviewController();
+//				reviewCtrl.reviewMenu(applicant, sc);
 				break;
 			
 			case "7": // 공지사항 조회

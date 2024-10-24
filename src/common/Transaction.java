@@ -23,6 +23,34 @@ public class Transaction {
 	} // end of private String experience(int experience)-----------
 	
 	
+	// 입력받은 경력 experience 0,1을 '신입', '경력'으로 바꿔주는 메소드
+		public static String education(int education) {
+			
+			String msg="";
+			
+			if(education == 0) {
+				msg = "대졸";
+			}
+			else if(education == 1){
+				msg = "고졸";
+			}
+			else if(education == 2){
+				msg = "초대졸";
+			}
+			else if(education == 3){
+				msg = "대학교재학";
+			}
+			else if(education == 4){
+				msg = "대학교휴학";
+			}
+			else {
+				msg = "존재하지 않는 경력입니다. 경력은 '신입'과 '경력'만 가능합니다.";
+			}
+			return msg;
+			
+		} // end of private String experience(int experience)-----------
+	
+	
 	
 	// 입력받은 경력 experience '신입', '경력'을 0,1으로 바꿔주는 메소드
 	public static int experience(String experience) {
