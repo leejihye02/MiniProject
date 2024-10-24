@@ -13,10 +13,10 @@ public class Transaction {
 			msg = "신입";
 		}
 		else if(experience == 1){
-			msg = "경력";
+			msg = "경력직";
 		}
 		else {
-			msg = "존재하지 않는 경력입니다. 경력은 '신입'과 '경력'만 가능합니다.";
+			msg = "존재하지 않는 경력입니다. 경력은 '신입'과 '경력직'만 가능합니다.";
 		}
 		return msg;
 		
@@ -60,7 +60,7 @@ public class Transaction {
 		if(experience.equals("신입")) {
 			msg = 0;
 		}
-		else if(experience.equals("경력")){
+		else if(experience.equals("경력직")){
 			msg = 1;
 		}
 		else {

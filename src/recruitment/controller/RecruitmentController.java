@@ -2,14 +2,13 @@ package recruitment.controller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
 import common.Transaction;
 import company.domain.CompanyDTO;
-import job.domain.JobDTO;
+import job.controller.JobController;
 import recruitment.domain.RecruitmentDTO;
 import recruitment.model.*;
 import utils.Msg;
@@ -23,6 +22,7 @@ public class RecruitmentController {
 	ApplyDAO adao = new ApplyDAO_imple();
 	JobDAO jdao = new JobDAO_imple();
 	List<RecruitmentDTO> RecruitmentList;
+	JobController jCtrl = new JobController();
 	
 	// method
 	
@@ -93,32 +93,13 @@ public class RecruitmentController {
 	private void recruitmentInfo(Scanner sc) {
 		
 		StringBuilder sb = new StringBuilder();
-		
-		System.out.print("▷ 채용공고순번 입력 : ");
-		String recruitmentId = sc.nextLine();
-		
-		RecruitmentDTO recruitmentDTO = rdao.recruitmentInfoSelect(recruitmentId);
-		
+
+		RecruitmentDTO recruitmentDTO = recruitmentInfoShow(sc); // 채용공고 상세보기를 출력해주는 메소드
+		// 값이 없다면 리턴값이 null이 나온다
 		if(recruitmentDTO==null) { // 채용공고가 존재하지 않거나 문자로 입력한 경우
-			System.out.println(">> 입력하신 글번호 "+recruitmentId+"은 존재하지 않습니다. <<\n");
 			return;
 		}
 		else { // 만약 채용공고가 있을 경우
-			System.out.println("=== 채용공고 상세보기 ===");
-			System.out.println("-< "+recruitmentDTO.getRecruitmentId()+"번 채용공고 >------------------------------");
-			System.out.println("1.회사명 : " + recruitmentDTO.getComdto().getName()+"\n"+
-						       "2.채용제목 : " + recruitmentDTO.getTitle()+"\n"+
-							   "3.채용내용 : " + recruitmentDTO.getContents()+"\n"+
-							   "4.직종 : " + recruitmentDTO.getJobdto().getName()+"\n"+ // ----------------------------- 확인해보기
-							   "5.경력 : " + Transaction.experience(recruitmentDTO.getExperience())+"\n"+
-							   "6.채용형태 : " + Transaction.empType(recruitmentDTO.getEmpType())+"\n"+
-							   "7.지역 : " + recruitmentDTO.getComdto().getAddress()+"\n"+
-							   "8.채용인원 : " + recruitmentDTO.getPeople()+"\n"+
-							   "9.연봉 : " + Transaction.salary(recruitmentDTO.getSalary())+"\n"+
-							   "10.등록일자 : " + recruitmentDTO.getRegisterday()+"\n"+
-							   "11.채용마감일자 : " + recruitmentDTO.getDeadlineday()+"\n"+
-							   "-".repeat(50));
-			
 			sb.append("-< 입사지원자 목록 >"+"-".repeat(42)+"\n"
 					+ "지원서순번  이름    지원동기                         입사지원일\n"
 					+ "-".repeat(62));// 입자지원자 목록 타이틀
@@ -151,6 +132,7 @@ public class RecruitmentController {
 					}
 					else {
 						System.out.println(">> 채용공고 삭제가 완료되었습니다. <<");
+						return;
 					}
 					break;
 					
@@ -171,14 +153,34 @@ public class RecruitmentController {
 
 
 
+	// 채용공고 상세보기를 출력해주는 메소드
+	RecruitmentDTO recruitmentInfoShow(Scanner sc) {
+		
+		System.out.print("▷ 채용공고순번 입력 : ");
+		String recruitmentId = sc.nextLine();
+		
+		RecruitmentDTO recruitmentDTO = rdao.recruitmentInfoSelect(recruitmentId);
+		
+		if(recruitmentDTO==null) { // 채용공고가 존재하지 않거나 문자로 입력한 경우
+			System.out.println(">> 입력하신 글번호 "+recruitmentId+"은 존재하지 않습니다. <<\n");
+			
+		}
+		else { // 만약 채용공고가 있을 경우
+			System.out.println(recruitmentDTO.toString()); // 채용공고를 보여주는 메소드
+		}
+		
+		return recruitmentDTO;
+		
+	} // end of private void recruitmentInfoShow(String recruitmentId)----------
+
+
+
 	// 채용공고 등록
 	private void recruitmentInsert(CompanyDTO companyDTO, Scanner sc) {
 		
-		List<JobDTO> jobDTO = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
 		RecruitmentDTO recruitmentDTO = new RecruitmentDTO();
 		
-		System.out.println("=== 채용공고 등록 ===");
+		System.out.println("\n=== 채용공고 등록 ===");
 		
 		String title; // 제목 전역변수
 		do {
@@ -215,50 +217,7 @@ public class RecruitmentController {
 		} while(true);
 		// 채용내용
 		
-		
-		
-		jobDTO = jdao.jobList(); // 희망직종 목록을 보여주는 메소드
-		
-		
-		
-		/////////////////////////////////////////////
-		sb.append("=".repeat(20)+"< 희망직종 목록 >"+"=".repeat(20));
-		for(int i=0; i<21; i++) {
-			if(i%3==0) {
-				sb.append("\n");
-			}
-				sb.append(align(jobDTO.get(i).getJob_id(), 3)+align(jobDTO.get(i).getName(), 15)); 
-		}// end of for()-------------------
-		sb.append("\n"+"=".repeat(53));
-		
-		System.out.printf(sb.toString()+"\n");
-		/////////////////////////////////////////////
-		
-		
-		int fk_job_id; // 직종 전역변수
-		do {
-			/////////////////////////////////////////////
-			System.out.print("▷ 직종 번호 입력 : ");
-			String put_fk_job_id = sc.nextLine();
-			
-			if(put_fk_job_id.isBlank()) {
-				System.out.println(">> [경고] 직종 번호는 필수 입력사항입니다. <<\n");
-			}
-			else if(put_fk_job_id.length() > 21 && put_fk_job_id.length() < 0) {
-				System.out.println(">> [경고] 직종 번호는 1부터 21까지 가능합니다. <<\n");
-			}
-			else {
-				try {
-					fk_job_id = Integer.parseInt(put_fk_job_id);
-					
-					break;
-				} catch(NumberFormatException e) {
-					System.out.println(">> [경고] 직종 번호는 숫자로만 입력해주세요 <<\n");
-				}
-			}
-			/////////////////////////////////////////////
-		} while(true);
-		// do~while()-----------------------
+		int fk_job_id = jCtrl.jobShowList(sc); // 직종목록을 뽑아주는 메소드
 		// 직종 번호 입력
 		
 		int experienceNo; // 경력 전역변수
@@ -273,7 +232,7 @@ public class RecruitmentController {
 			else {
 				experienceNo = Transaction.experience(experience); // experience(String) 를 통해 타입을 맞춰 experienceNo에 넣는다.
 				if(experienceNo == -1) {
-					Msg.W("경력은 '신입', '경력'으로만 입력해주세요");
+					Msg.W("경력은 '신입', '경력직'으로만 입력해주세요");
 				}
 				else {
 					break;
@@ -430,9 +389,6 @@ public class RecruitmentController {
 	// 채용공고 수정
 	private void recruitmentUpdate(RecruitmentDTO recruitmentDTO, Scanner sc) {
 		
-		List<JobDTO> jobDTO = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
-		
 		System.out.println(">> [주의사항] 변경하지 않고 예전의 데이터값을 그대로 사용하시려면 그냥 엔터하세요!! <<\n");
 		System.out.println("=== 채용공고 수정 ===");
 		
@@ -479,48 +435,7 @@ public class RecruitmentController {
 		// 채용내용
 		
 		
-		jobDTO = jdao.jobList(); // 희망직종 목록을 보여주는 메소드
-		
-		
-		/////////////////////////////////////////////
-		sb.append("=".repeat(20)+"< 희망직종 목록 >"+"=".repeat(20));
-		for(int i=0; i<21; i++) {
-			if(i%3==0) {
-				sb.append("\n");
-			}
-			sb.append(align(jobDTO.get(i).getJob_id(), 3)+align(jobDTO.get(i).getName(), 15)); 
-		}// end of for()-------------------
-		sb.append("\n"+"=".repeat(53));
-		
-		System.out.printf(sb.toString()+"\n");
-		/////////////////////////////////////////////
-		
-		
-		int fk_job_id;
-		do {
-			/////////////////////////////////////////////
-			System.out.print("▷ 직종 번호 입력 : ");
-			String put_fk_job_id = sc.nextLine();
-			
-			if(put_fk_job_id.isEmpty()) {
-				fk_job_id = recruitmentDTO.getJobdto().getJob_id();
-				break;
-			}
-			else if(put_fk_job_id.length() > 21 && put_fk_job_id.length() < 0) {
-				System.out.println(">> [경고] 직종 번호는 1부터 21까지 가능합니다. <<\n");
-			}
-			else {
-				try {
-					fk_job_id = Integer.parseInt(put_fk_job_id);
-					
-					break;
-				} catch(NumberFormatException e) {
-					System.out.println(">> [경고] 직종 번호는 숫자로만 입력해주세요 <<\n");
-				}
-			}
-			/////////////////////////////////////////////
-		} while(true);
-		// do~while()-----------------------
+		int fk_job_id = jCtrl.jobUpdateList(recruitmentDTO.getFkJobId(), sc); // 직종목록을 뽑아주는 메소드
 		// 직종 번호 입력
 		
 		int experienceNo;
@@ -538,7 +453,7 @@ public class RecruitmentController {
 			// experience(String) 를 통해 타입을 맞춰 experienceNo에 넣는다.
 			
 			if(experienceNo == -1) {
-				System.out.println(">> [경고] 경력은 '신입', '경력'으로만 입력해주세요 <<\n");
+				System.out.println(">> [경고] 경력은 '신입', '경력직'으로만 입력해주세요 <<\n");
 			}
 			else {
 				break;
@@ -679,6 +594,7 @@ public class RecruitmentController {
 		recruitmentDTO.setPeople(people);
 		recruitmentDTO.setSalary(salary);
 		recruitmentDTO.setDeadlineday(deadlineday);
+		recruitmentDTO.setUpdateday(deadlineday);
 		
 		int n = rdao.recruitmentUpdate(recruitmentDTO);
 		
