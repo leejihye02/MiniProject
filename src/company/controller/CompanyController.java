@@ -6,15 +6,15 @@ import java.util.Map;
 import java.util.Scanner;
 
 import company.domain.CompanyDTO;
-import company.model.companyDAO_imple;
+import company.model.CompanyDAO_imple;
+import utils.Msg;
 import utils.ValidationUtil;
 
 
 public class CompanyController {
 
 	//field
-	companyDAO_imple cdao = new companyDAO_imple();
-	CompanyDTO companyDTO = new CompanyDTO();
+	CompanyDAO_imple cdao = new CompanyDAO_imple();
 
 	//method
 	
@@ -27,12 +27,13 @@ public class CompanyController {
 		String name = "";
 		String businessNo= "";
 		String address = "";
-		String businessType = "";
+		int businessType = 0;
 		String industry = "";
 		String tel= "";
 		String companyId = "";
 		String passwd ="";
 		String email ="";
+		String businessTypeStr = "";
 				
 		System.out.println("\n=== 구인회사 회원가입 ===\n");
 		
@@ -81,6 +82,7 @@ public class CompanyController {
 		
 
 		
+
 		do {
 			System.out.print("5. 사업자등록번호 : ");
 			businessNo = sc.nextLine();
@@ -105,15 +107,23 @@ public class CompanyController {
 		
 		
 		do {
-			System.out.print("7. 기업형태 [0:대기업, 1:중견기업 2:중소기업]: ");
-			businessType = sc.nextLine();
 			
-			if(!businessType.isBlank()) {
-				break;
+			System.out.print("7. 기업형태 [0:대기업, 1:중견기업 2:중소기업]: ");
+			businessTypeStr = sc.nextLine();
+		
+			if(!businessTypeStr.isBlank()) {
+				try {
+					businessType = Integer.parseInt(businessTypeStr);
+				}catch(NumberFormatException e) {
+					Msg.W("숫자로 입력하세요.");
+					continue ;
+			    }
+			 
+			break;
 			}
-		
-		
+	
 		}while(true);
+		
 		
 		
 		do {		
@@ -146,7 +156,7 @@ public class CompanyController {
 		company.setName(name);
 		company.setBusinessNo(businessNo);
 		company.setAddress(address);
-		company.setBusinessType(0);
+		company.setBusinessType(businessType);
 		company.setIndustry(industry);
 		company.setTel(tel);
 		
@@ -161,10 +171,8 @@ public class CompanyController {
 		
 	
 	}//public void register(Scanner sc)
-	
-	
-	
-	
+
+
 	//login
 	public CompanyDTO login(Scanner sc){
 		
@@ -210,10 +218,10 @@ public class CompanyController {
 		
 		do {
 		/////////////////////////////
-			System.out.println(">> === 구인회사 전용메뉴 (로그인 "+companyDTO.getName()+"중...) ===<<");
+			System.out.println("\n>> === 구인회사 전용메뉴 ("+companyDTO.getName()+" 로그인 중...) ===<<");
 			
 			System.out.println("1. 우리회사정보관리   2.우리회사리뷰조회\n"
-					          + "3. 우리회사 채용공고 관리   0.로그아웃");
+					          + "3. 우리회사 채용공고 관리   4.공지사항   0.로그아웃");
 			System.out.println("====================================");
 			
 			System.out.print("▷ 메뉴번호 선택 : ");
@@ -222,9 +230,9 @@ public class CompanyController {
 			
 			
 			switch (choiceNo) {
-			case "1"://우리회사정보관리 - 이지혜
+		case "1"://우리회사정보관리 - 이지혜
 				
-				companyInfoManagement(companyDTO.getName(),sc);
+				companyInfoManagement(companyDTO,sc);
 				
 				break;
 				
@@ -234,6 +242,10 @@ public class CompanyController {
 				
 			case "3"://우리회사채용공고 - 강이훈
 				//menuRecruitment( cdto.getName() , sc);
+				break;
+				
+				
+			case "4"://공지사항
 				break;
 		
 		
@@ -256,24 +268,27 @@ public class CompanyController {
 	
 
 	//우리회사정보관리
-	private void companyInfoManagement(String name, Scanner sc) {
+	private void companyInfoManagement(CompanyDTO companyDTO, Scanner sc) {
 		
 		
-		System.out.println("==== 우리 회사 정보관리 =====");
+		System.out.println("\n==== 우리 회사 정보관리 =====");
+		System.out.println("\n--<"+companyDTO.getName()+"기업의 정보>--------------------------");
 		System.out.println(companyDTO.toString());//companyDTO > toString 에 정보 들어가있음 
 		System.out.println("-".repeat(45));
 		
 		
-		System.out.println("=======< 메뉴 >==========");
+		
+		System.out.println("\n=======< 메뉴 >==========");
 		System.out.println("1. 회사정보수정  0.돌아가기");
 		System.out.println("-".repeat(30));
 		
-		System.out.print("▷ 메뉴번호선택");
+		System.out.print("▷ 메뉴번호선택 : ");
 		String choiceNo = sc.nextLine();
 		
 		switch (choiceNo) {
 		case "1"://회사정보수정
-			cpInfoModify(companyDTO, sc); //CompanyInfoModify
+			cpInfoUpdate(companyDTO, sc); //CompanyInfoModify
+			
 			break;
 			
 		case "0"://돌아가기
@@ -291,16 +306,135 @@ public class CompanyController {
 	}//end of private void companyInfoManagement(String name, Scanner sc) {
 
 
-
+	
 	
 
-	//회사정보 수정
-	private void cpInfoModify(CompanyDTO cdto2, Scanner sc) {
-		
-		System.out.println(">> [ 주의사항 ] 변경하지 않고 예전의 데이터값을 그대로 사용하시려면 그냥 엔터하세요.");
+	//----회사정보 수정---
+	private void cpInfoUpdate(CompanyDTO  companyDTO, Scanner sc) {
 		
 		
-	}//end of private void cpInfoModify(companyDTO cdto2, Scanner sc)
+
+		System.out.println("\n>> [ 주의사항 ] 변경하지 않고 예전의 데이터값을 그대로 사용하시려면 그냥 엔터하세요.<<");
+
+		
+		
+		System.out.print("▷ 비밀번호 [영어, 숫자, 특수문자 조합] :");
+		String passwd = sc.nextLine();
+		if(passwd.isBlank()) {
+			passwd = companyDTO.getPasswd();
+		}
+		
+		System.out.print("▷ 이메일 : ");
+		String email = sc.nextLine();
+		if(email.isBlank()) {
+			email = companyDTO.getEmail();
+		}
+		
+		System.out.print("▷ 회사명 : ");
+		String name = sc.nextLine();
+		if(name.isBlank()) {
+			name = companyDTO.getName();
+		}
+		
+		
+		
+		System.out.print("▷ 사업자등록번호 : ");
+		String businessNo = sc.nextLine();
+		if(businessNo.isBlank() ) {
+			businessNo =companyDTO.getBusinessNo();
+		}
+		
+		int businessType = 0;
+		
+		
+		do {
+			System.out.print("▷ 기업형태 [0:대기업/1:중견기업/2:중소기업] : ");
+			String businessTypeStr = sc.nextLine();
+			if(businessTypeStr.isBlank()) {
+				businessType =  companyDTO.getBusinessType();
+			}
+			else {
+				try {
+					
+					businessType = Integer.parseInt(businessTypeStr);
+				
+				}catch(NumberFormatException e) {
+					Msg.W("숫자로 입력하세요.");
+			
+				}
+			}
+			break;
+		}while(true);
+
+		
+		System.out.print("▷ 주소 : ");
+		String address = sc.nextLine();
+		if(address.isBlank()) {
+			address = companyDTO.getAddress();
+		}
+		
+		
+		System.out.print("▷ 연락처 : ");
+		String tel = sc.nextLine();
+		if(tel.isBlank()) {
+			tel = companyDTO.getTel();
+		}
+		
+		
+		System.out.print("▷ 업종 : ");
+		String industry = sc.nextLine();
+		if(industry.isBlank()) {
+			industry = companyDTO.getIndustry();
+		}
+	    
+	
+	    companyDTO.setPasswd(passwd);
+	    companyDTO.setEmail(email);
+	    companyDTO.setName(name);
+	    companyDTO.setBusinessNo(businessNo);
+	    companyDTO.setBusinessType(businessType);
+	    companyDTO.setAddress(address);
+	    companyDTO.setTel(tel);
+	    companyDTO.setIndustry(industry);
+		
+		//-------------------------------------------------------
+	    String yn = "";
+	    
+	    do {
+		    System.out.print(">> 정말로 수정하시겠습니까? [ Y / N ] : ");
+		    yn = sc.nextLine();
+			//--------------------------------------------------------------
+		    
+		    if("y".equalsIgnoreCase(yn)) {//y를 입력 했을 경우
+		    
+
+		    	int n = cdao.cpInfoUpdate(companyDTO);
+		    	
+		    	if(n==1) {
+		    		System.out.println(">> 정보 수정 성공! <<\n");
+		    		return;
+		    	}
+		    	else {
+		    		System.out.println(">> SQL 구문 오류 발생으로 인해 글수정이 실패되었습니다. << \n");
+		    		return;
+		        }
+		    	
+		    }
+	    	else if("n".equalsIgnoreCase(yn)) {//n을 입력했을 경우
+	    		System.out.println("글 수정을 취소했습니다.\n");
+	    		return;
+	    	}
+	    
+	    	else {
+	    		System.out.println(">>> [경고] 수정확인은 Y 또는 N 으로만 해주세요! <<<\n");
+	    	}
+	    }while(true);
+	}//end of private void cpInfoUpdate(companyDTO companyDTO, Scanner sc)
+	
+	
+	
+	
+	
 	
 	
 	
