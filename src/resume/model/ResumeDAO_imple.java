@@ -24,6 +24,16 @@ public class ResumeDAO_imple implements ResumeDAO{
 	JobDTO jobDTO = null;
 	String sql = "";
 	
+	// === 자원반납 === //
+	private void close() {
+		try {
+			if(rs != null) { rs.close(); rs = null; }
+			if(pstmt != null) { pstmt.close(); pstmt = null; }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+	}// end of close()-------------------------
+	
 	
 	
 	// *** 이력서가 작성되어있는지 검사 *** //
@@ -53,7 +63,11 @@ public class ResumeDAO_imple implements ResumeDAO{
 				}
 				
 				
-			} catch (SQLException e) {}
+			} catch (SQLException e) {
+			}
+			finally {
+				close();
+			}
 		return completed;	// 행이 존재하지 않음 (이력서를 작성하지 않음 즉, 이력서 작성 실행가능)
 	}
 
@@ -99,7 +113,9 @@ public class ResumeDAO_imple implements ResumeDAO{
 			
 		    } catch (SQLException e) {
 				e.printStackTrace();
-		    }
+		    }finally {
+				close();
+			}
 			
 		return resumeDTO;
 	}
@@ -133,6 +149,8 @@ public class ResumeDAO_imple implements ResumeDAO{
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally {
+			close();
 		}
 		
 		return result;
@@ -172,13 +190,12 @@ public class ResumeDAO_imple implements ResumeDAO{
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally {
+			close();
 		}
+		
 		return result;
 	}
-
-
-
-
 	
 	
 	
