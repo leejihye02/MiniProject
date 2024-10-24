@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import common.ProjectDBConnection;
 import company.domain.CompanyDTO;
@@ -50,7 +51,7 @@ public class RecruitmentDAO_imple implements RecruitmentDAO {
 					   + " ) A join TBL_COMPANY B "
 					   + " on A.fk_company_id = B.company_id "
 					   + " join TBL_JOB J "
-					   + " on J.job_id = A.fk_job_id order by 1 ";
+					   + " on J.job_id = A.fk_job_id where is_delete = 0 and sysdate < deadlineday order by 1 ";
 			
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
@@ -101,7 +102,7 @@ public class RecruitmentDAO_imple implements RecruitmentDAO {
 		
 		try {
 			
-			String sql = " select recruitment_id, B.name AS comName, title, contents, J.name AS jobName, job_id, experience, emp_type, address, people, salary, to_char(registerday, 'yyyy-mm-dd') AS registerday, to_char(deadlineday, 'yyyy-mm-dd') AS deadlineday "
+			String sql = " select recruitment_id, B.name AS comName, title, contents, J.name AS jobName, job_id, experience, emp_type, address, people, salary, to_char(registerday, 'yyyy-mm-dd') AS registerday, to_char(deadlineday, 'yyyy-mm-dd') AS deadlineday, to_char(updateday, 'yyyy-mm-dd') AS updateday "
 					   + " from TBL_RECRUITMENT A join TBL_COMPANY B "
 					   + " on A.fk_company_id = B.company_id "
 					   + " join TBL_JOB J "
@@ -124,6 +125,7 @@ public class RecruitmentDAO_imple implements RecruitmentDAO {
 				recruitmentDTO.setSalary(rs.getInt("salary"));					// 연봉
 				recruitmentDTO.setRegisterday(rs.getString("registerday"));		// 등록일자
 				recruitmentDTO.setDeadlineday(rs.getString("deadlineday"));		// 마감일자
+				recruitmentDTO.setUpdateday(rs.getString("updateday"));
 				
 				CompanyDTO companyDTO = new CompanyDTO();
 				companyDTO.setName(rs.getString("comName")); 	// 회사명
@@ -167,31 +169,20 @@ public class RecruitmentDAO_imple implements RecruitmentDAO {
 		try {
 			
 			String sql = " insert into TBL_RECRUITMENT(recruitment_id, fk_company_id, fk_job_id, title, contents, emp_type, people, salary, deadlineday, experience)  "
-					   + " values(seq_recruitment_id.nextval, 'samsung', ?, ?, ?, ?, ?, ?, to_date(?), ?) ";
+					   + " values(seq_recruitment_id.nextval, ?, ?, ?, ?, ?, ?, ?, to_date(?), ?) ";
 			
 			pstmt = conn.prepareStatement(sql);
-//			pstmt.setInt(1, recruitmentDTO.getFkJobId());
-//			pstmt.setString(2, companyDTO.getCompanyId());
-//			pstmt.setString(3, recruitmentDTO.getTitle());
-//			pstmt.setString(4, recruitmentDTO.getContents());
-//			pstmt.setInt(5, recruitmentDTO.getEmpType());
-//			pstmt.setInt(6, recruitmentDTO.getPeople());
-//			pstmt.setInt(7, recruitmentDTO.getSalary());
-//			pstmt.setString(8, recruitmentDTO.getDeadlineday());
-//			pstmt.setInt(9, recruitmentDTO.getExperience());
-			
-			pstmt.setInt(1, recruitmentDTO.getFkJobId());
-			pstmt.setString(2, recruitmentDTO.getTitle());
-			pstmt.setString(3, recruitmentDTO.getContents());
-			pstmt.setInt(4, recruitmentDTO.getEmpType());
-			pstmt.setInt(5, recruitmentDTO.getPeople());
-			pstmt.setInt(6, recruitmentDTO.getSalary());
-			pstmt.setString(7, recruitmentDTO.getDeadlineday());
-			pstmt.setInt(8, recruitmentDTO.getExperience());
-			
+			pstmt.setString(1, companyDTO.getCompanyId());
+			pstmt.setInt(2, recruitmentDTO.getFkJobId());
+			pstmt.setString(3, recruitmentDTO.getTitle());
+			pstmt.setString(4, recruitmentDTO.getContents());
+			pstmt.setInt(5, recruitmentDTO.getEmpType());
+			pstmt.setInt(6, recruitmentDTO.getPeople());
+			pstmt.setInt(7, recruitmentDTO.getSalary());
+			pstmt.setString(8, recruitmentDTO.getDeadlineday());
+			pstmt.setInt(9, recruitmentDTO.getExperience());
 			
 			result = pstmt.executeUpdate(); // sql문 실행
-
 			
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -212,7 +203,7 @@ public class RecruitmentDAO_imple implements RecruitmentDAO {
 		
 		try {
 			
-			String sql = " update TBL_RECRUITMENT set Title = ?, Contents = ?, fk_job_id = ?, Experience = ?, emp_type = ?, people = ?, salary = ?, deadlineday = to_date(?) "
+			String sql = " update TBL_RECRUITMENT set Title = ?, Contents = ?, fk_job_id = ?, Experience = ?, emp_type = ?, people = ?, salary = ?, deadlineday = to_date(?), updateday = sysdate "
 					   + " where recruitment_id = ? ";
 			
 			pstmt = conn.prepareStatement(sql);
@@ -249,7 +240,7 @@ public class RecruitmentDAO_imple implements RecruitmentDAO {
 		
 		try {
 			
-			String sql = " delete from TBL_RECRUITMENT where recruitment_id = ? ";
+			String sql = " update TBL_RECRUITMENT set is_delete = 1 where recruitment_id = ? ";
 			
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, recruitmentDTO.getRecruitmentId());
@@ -266,6 +257,157 @@ public class RecruitmentDAO_imple implements RecruitmentDAO {
 		
 		return result;
 	} // end of public void recruitmentDelete()
+
+
+	
+	// *** 지원자수 상위 10개의 채용공고 보기를 해주는 메소드 *** //
+	@Override
+	public List<RecruitmentDTO> recruitmenTopList() {
+		
+		List<RecruitmentDTO> recruitmentList = new ArrayList<>();
+		
+		try {
+			String sql = " select rank, comName, jobName, title, emp_type, experience, deadlineday, is_delete "
+					   + " from  "
+					   + " ( "
+					   + " select dense_rank()over(order by(cnt) asc) AS rank, comName, jobName, title, emp_type, experience, deadlineday, is_delete, cnt "
+					   + " from "
+					   + "     ( "
+					   + "         select  c.name AS comName, j.name AS jobName, R.title, emp_type, experience, deadlineday, is_delete, cnt "
+					   + "         from "
+					   + "         tbl_recruitment R left join  "
+					   + "         (\r\n"
+					   + "             select fk_recruitment_id, count(apply_id) AS cnt "
+					   + "             from tbl_apply "
+					   + "             group by fk_recruitment_id "
+					   + "         ) A "
+					   + "         on r.recruitment_id = a.fk_recruitment_id "
+					   + "         left join tbl_company C  "
+					   + "         on r.fk_company_id = c.company_id "
+					   + "         join tbl_job J "
+					   + "         on j.job_id = r.fk_job_id "
+					   + "         where is_delete = 0 and sysdate < deadlineday "
+					   + "     ) V "
+					   + " ) V1 "
+					   + " where rank between 1 and 10 and is_delete = 0 ";
+			
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				
+				RecruitmentDTO recruitmentDTO = new RecruitmentDTO();
+				recruitmentDTO.setRank(rs.getInt("rank"));
+				recruitmentDTO.setTitle(rs.getString("title"));
+				recruitmentDTO.setEmpType(rs.getInt("emp_type"));
+				recruitmentDTO.setExperience(rs.getInt("experience"));
+				recruitmentDTO.setDeadlineday(rs.getString("deadlineday"));
+				
+				CompanyDTO companyDTO = new CompanyDTO();
+				companyDTO.setName(rs.getString("comName"));
+				
+				recruitmentDTO.setComdto(companyDTO);
+				// 채용DTO에 회사DTO 넣기
+				
+				JobDTO jobDTO = new JobDTO();
+				jobDTO.setName(rs.getString("jobName"));
+				
+				recruitmentDTO.setJobdto(jobDTO);
+				// 채용DTO에 직종DTO 넣기
+				
+				recruitmentList.add(recruitmentDTO);
+			}
+			
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		
+		return recruitmentList;
+	}
+
+
+	
+	// *** 채용공고에서 회사명, 직종별, 지역별, 경력 검색을 해주는 메소드 *** //
+	@Override
+	public List<RecruitmentDTO> showAllRecruitment(Map<String, String> map) {
+		
+		List<RecruitmentDTO> recruitmentList = null; // 가입된 회원이 없을 수도 있으니 null로 초기화
+		
+		try {
+			
+			String sql = " select recruitment_id, C.name AS comName, J.name AS jobName, title, emp_type, experience, to_char(deadlineday, 'yyyy-mm-dd') AS deadlineday, job_id "
+					   + " from TBL_RECRUITMENT R join TBL_JOB J "
+					   + " on R.fk_job_id = J.job_id "
+					   + " join TBL_COMPANY C "
+					   + " on R.fk_company_id = C.company_id ";
+			
+			switch (map.get("status")) {
+			case "":
+			case "1": // 회사명 검색
+				sql += " where C.name like '%'||?||'%' and sysdate < deadlineday and rownum < 10 and is_delete = 0 order by 1 ";
+				break;
+				
+			case "2": // 직종별 검색
+				sql += " where job_id like ? and sysdate < deadlineday and rownum < 10 and is_delete = 0 order by 1 ";
+				break;
+				
+			case "3": // 지역별 검색
+				sql += " where address like '%'||?||'%' and sysdate < deadlineday and rownum < 10 and is_delete = 0 order by 1 ";
+				break;
+				
+			case "4": // 경력 검색
+				sql += " where experience like '%'||?||'%' and sysdate < deadlineday and rownum < 10 and is_delete = 0 order by 1 ";
+				break;
+			}
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, map.get("search"));
+			rs = pstmt.executeQuery(); // sql문 실행
+			
+			int cnt = 0;
+			while(rs.next()) { 
+				cnt++;
+				if(cnt==1) {
+					recruitmentList = new ArrayList<>();
+				}
+				
+				RecruitmentDTO recruitmentDTO = new RecruitmentDTO(); // 레코드 수만큼 MemberDTO member 생성해서 첫번째꺼 돌고 두번째꺼 돌고,,, 계속 돔
+				
+				recruitmentDTO.setRecruitmentId(rs.getInt("recruitment_id"));
+				recruitmentDTO.setTitle(rs.getString("title"));
+				recruitmentDTO.setEmpType(rs.getInt("emp_type"));
+				recruitmentDTO.setExperience(rs.getInt("experience"));
+				recruitmentDTO.setDeadlineday(rs.getString("deadlineday"));
+				
+				CompanyDTO companyDTO = new CompanyDTO();
+				companyDTO.setName(rs.getString("comName"));
+				
+				recruitmentDTO.setComdto(companyDTO);
+				// 채용DTO에 회사DTO 넣기
+				
+				JobDTO jobDTO = new JobDTO();
+				jobDTO.setName(rs.getString("jobName"));
+				
+				recruitmentDTO.setJobdto(jobDTO);
+				// 채용DTO에 직종DTO 넣기
+				
+				
+				recruitmentList.add(recruitmentDTO);
+			}
+
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		return recruitmentList;
+	}
 	
 
 }

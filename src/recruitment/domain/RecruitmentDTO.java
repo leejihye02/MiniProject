@@ -1,5 +1,7 @@
 package recruitment.domain;
 
+import apply.domain.ApplyDTO;
+import common.Transaction;
 import company.domain.CompanyDTO;
 import job.domain.JobDTO;
 
@@ -20,15 +22,19 @@ public class RecruitmentDTO {
 	private int experience; 			// 경력
 	private String updateday; 			// 최신수정일
 	private int isDelete; 				// 삭제여부
+	private int rank;				// 진성씨 관리자 파트를 위한 rank 저장소
+	
 	
 	
 	private JobDTO jobdto;				// TBL_JOB 테이블과 join하기 위함
 	
 	private CompanyDTO comdto;			// TBL_COMPANY 테이블과 join하기 위함
 	
+	private ApplyDTO appdto;			// TBL_APPLY 테이블과 join하기 위함
 	
 	
-	// meythod
+	
+	// === meythod ===
 	public int getRecruitmentId() {
 		return recruitmentId;
 	}
@@ -95,19 +101,35 @@ public class RecruitmentDTO {
 	public void setExperience(int experience) {
 		this.experience = experience;
 	}
+	
+	// 최종수정날짜
 	public String getUpdateday() {
-		return updateday;
-	}
+		
+		if(updateday == null){
+			return registerday;
+		}
+		else {
+			return updateday;
+		}
+	} // end of public String getUpdateday()----
+	
 	public void setUpdateday(String updateday) {
 		this.updateday = updateday;
 	}
+	//
+	
 	public int getIsDelete() {
 		return isDelete;
 	}
 	public void setIsDelete(int isDelete) {
 		this.isDelete = isDelete;
 	}
-	
+	public int getRank() {
+		return rank;
+	}
+	public void setRank(int rank) {
+		this.rank = rank;
+	}
 	
 	// join
 	public JobDTO getJobdto() {
@@ -123,5 +145,32 @@ public class RecruitmentDTO {
 	public void setComdto(CompanyDTO comdto) {
 		this.comdto = comdto;
 	}
+	
+	public ApplyDTO getAppdto() {
+		return appdto;
+	}
+	public void setAppdto(ApplyDTO appdto) {
+		this.appdto = appdto;
+	}
+
+	/////////////////////////////////////////
+	
+	// 채용공고 출력
+	@Override
+	public String toString() {
+        return "-< "+recruitmentId+"번 채용공고 >------------------------------\n"+
+        	   "1.회사명 : " + comdto.getName()+"\n"+
+		       "2.채용제목 : " + title+"\n"+
+			   "3.채용내용 : " + contents+"\n"+
+			   "4.직종 : " + jobdto.getName()+"\n"+ // ----------------------------- 확인해보기
+			   "5.경력 : " + Transaction.experience(experience)+"\n"+
+			   "6.채용형태 : " + Transaction.empType(empType)+"\n"+
+			   "7.지역 : " + comdto.getAddress()+"\n"+
+			   "8.채용인원 : " + people+"\n"+
+			   "9.연봉 : " + Transaction.salary(salary)+"\n"+
+			   "10.최종수정일자 : " + getUpdateday()+"\n"+
+			   "11.채용마감일자 : " + deadlineday+"\n"+
+			   "-".repeat(50);
+    }
 	
 }
