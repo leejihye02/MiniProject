@@ -110,7 +110,7 @@ public class ValidationUtil {
 		}
 		
 		// 이메일에 @가 없으면 false
-		regex = "[@]"; // 알파벳, 숫자, 한자, 공백을 제외한 문자는 특수문자로 간주
+		regex = "^[0-9a-zA-Z]([-_\\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\\.]?[0-9a-zA-Z])*\\.[a-zA-Z]{2,3}$"; // 알파벳, 숫자, 한자, 공백을 제외한 문자는 특수문자로 간주
 		pattern = Pattern.compile(regex);
 		matcher = pattern.matcher(email);
 
