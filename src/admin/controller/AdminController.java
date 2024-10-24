@@ -1,6 +1,10 @@
 package admin.controller;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +16,11 @@ import admin.model.AdminDAO_imple;
 import applicant.domain.ApplicantDTO;
 import applicant.model.ApplicantDAO;
 import applicant.model.ApplicantDAO_imple;
-import company.domain.CompanyDTO;
 import notification.controller.NotificationController;
+import review.domain.ReviewAuthDTO;
+import review.model.ReviewAuthDAO;
+import review.model.ReviewAuthDAO_imple;
+import statistics.StatisticsController;
 import utils.Msg;
 import utils.ValidationUtil;
 
@@ -26,7 +33,11 @@ public class AdminController {
 
 	private final ApplicantDAO applicantDAO = new ApplicantDAO_imple(); // ApplicantDAO 구현체
 
+	private final ReviewAuthDAO reviewAuthDAO = new ReviewAuthDAO_imple(); // ReviewAuthDAO 구현체
+
 	private final NotificationController notificationController = new NotificationController(); // 공지사항 Controller 인스턴스
+	
+	private final StatisticsController statisticsController = new StatisticsController(); // 통계 조회 Controller 인스턴스
 
 	private StringBuilder sb = new StringBuilder(); // StringBuilder 객체 초기화
 
@@ -77,17 +88,17 @@ public class AdminController {
 	/*
 	 * 관리자 전용메뉴
 	 */
-	public void adminMenu(CompanyDTO companyDTO, AdminDTO adminDTO, Scanner sc) {
+	public void adminMenu(AdminDTO adminDTO, Scanner sc) {
 		String menu = null; // 메뉴번호
 
 		do {
-			System.out.println("\n=== 관리자 전용메뉴(" + adminDTO.getName() + "님 로그인 중) ===");
-			System.out.println("1.구직자 관리   2.구인회사 관리   3.공지사항 관리   0.로그아웃");
-			System.out.println("-".repeat(50));
+			System.out.println("\n=============== 관리자 전용메뉴(" + adminDTO.getName() + "님 로그인 중) ===============");
+			System.out.println("1.구직자 관리   2.구인회사 관리   3.구직자 회사 인증 관리   4.공지사항 관리\n5.통계   0.로그아웃");
+			System.out.println("=".repeat(60));
 
 			System.out.print("▷ 메뉴번호 선택 : ");
 			menu = sc.nextLine();
-			
+
 			switch (menu) {
 			case "0": { // 로그아웃
 				adminDTO = null;
@@ -98,11 +109,19 @@ public class AdminController {
 				break;
 			}
 			case "2": { // 구인회사 관리
-				companyManage(companyDTO, sc);
+				companyManage(sc);
 				break;
 			}
-			case "3": { // 공지사항 관리
+			case "3": { // 구직자 회사 인증 관리 (구직자의 재직 이력 인증)
+				manageReviewAuth(sc);
+				break;
+			}
+			case "4": { // 공지사항 관리
 				notificationController.notificationMenu(adminDTO, sc);
+				break;
+			}
+			case "5": { // 통계
+				statisticsController.statisticsMenu(adminDTO, sc);
 				break;
 			}
 			default:
@@ -114,43 +133,40 @@ public class AdminController {
 	/*
 	 * 구인회사 관리
 	 */
-	private void companyManage(CompanyDTO companyDTO, Scanner sc) {
+	private void companyManage(Scanner sc) {
+		// TODO 구인회사 관리는 고민해보고 구현
 		String menu = null; // 메뉴번호
 
 		do {
 			System.out.println("=== 구인회사 관리 ===");
 
-			System.out.println("=====================< 메뉴 >========================");
-			System.out.println("1.리뷰점수로 목록조회\t2.지원수로 목록조회\n3.카테고리 검색\t0.돌아가기");
-			System.out.println("====================================================");
+			System.out.println("=====================< 카테고리별 검색 메뉴 >========================");
+			System.out.println("1.회사명\t2.업종별\t3.지역별\n4.채용중인 회사 조회\t0.돌아가기");
+			System.out.println("================================================================");
 
 			System.out.print("▷ 메뉴번호 선택 : ");
 			menu = sc.nextLine();
-			
+
 			switch (menu) {
 			case "0": { // 돌아가기
 				return;
 			}
-			case "1": { // 리뷰점수로 목록조회
-//				getCompanyListByReviewScore();
+			case "1": { 
 				break;
 			}
-			case "2": { // 지원수로 목록조회
-//				getCompanyListByApplicants(companyDTO, sc);
+			case "2": { 
 				break;
 			}
-			case "3": { // 카테고리 검색
-
+			case "3": { 
+				break;
+			}
+			case "4": {
 				break;
 			}
 			default:
 				Msg.W("메뉴에 없는 번호입니다.");
 			}
 		} while (!"0".equals(menu));
-
-//		System.out.println("===========< 카테고리별 검색 메뉴 >==========");
-//		System.out.println("1.회사명\t2.업종별\t3.지역별");
-//		System.out.println("========================================");
 	}
 
 	/*
@@ -168,7 +184,7 @@ public class AdminController {
 
 			System.out.print("▷ 메뉴번호 선택 : ");
 			menu = sc.nextLine();
-			
+
 			switch (menu) {
 			case "0": { // 돌아가기
 				return;
@@ -205,19 +221,19 @@ public class AdminController {
 	private void getApplicantListByName(Scanner sc) {
 		String name = null; // 구직자 성명
 		List<ApplicantDTO> applicantList = new ArrayList<>(); // 구직자 리스트
-		
+
 		System.out.print("▷ 성명 입력 : ");
 		name = sc.nextLine();
 
 		// ApplicantDAO_imple에서 해당 성명의 구직자 반환
 		applicantList = applicantDAO.getApplicantListByName(name);
-		
+
 		// 구직자가 존재하지 않는 경우
 		if (applicantList.size() < 1) {
 			System.out.println(">> 조회된 결과가 없습니다. <<\n");
 			return;
 		}
-		
+
 		for (ApplicantDTO applicantDTO : applicantList) {
 			sb.append(applicantDTO.toString());
 		}
@@ -300,8 +316,7 @@ public class AdminController {
 	}
 
 	/*
-	 * 구직자 차단 관리
-	 * block = true : 차단, block = false : 차단 해제
+	 * 구직자 차단 관리 block = true : 차단, block = false : 차단 해제
 	 */
 	private void blockApplicant(boolean block, Scanner sc) {
 		String applicantId = null; // 구직자 아이디
@@ -325,10 +340,157 @@ public class AdminController {
 	}
 
 	/*
+	 * 구직자 회사 인증 관리 (구직자의 재직 이력 인증)
+	 */
+	private void manageReviewAuth(Scanner sc) {
+		String menu = null; // 메뉴 번호
+
+		do {
+			System.out.println("=== 구직자 회사인증 관리 ===\n");
+
+			System.out.println("============< 메뉴 >=============");
+			System.out.println("1.회사인증 요청 관리\t0.돌아가기");
+			System.out.println("================================");
+
+			System.out.print("▷ 메뉴번호 선택 : ");
+			menu = sc.nextLine();
+
+			switch (menu) {
+			case "0": { // 돌아가기
+				return;
+			}
+			case "1": { // 회사인증 요청 관리
+				manageRequest(sc);
+				break;
+			}
+			default:
+				Msg.W("메뉴에 없는 번호입니다.");
+			}
+		} while (!"0".equals(menu));
+	}
+
+	/*
+	 * 회사인증 요청 관리 요청된 인증을 허가 또는 거부할 수 있다.
+	 */
+	private void manageRequest(Scanner sc) {
+		List<ReviewAuthDTO> reviewAuthList = getReqReviewAuthList();// 현재 대기중인 회사 인증 요청 목록
+		ReviewAuthDTO newReviewAuthDTO = new ReviewAuthDTO(); // DAO 메소드에 파라미터로 지정할 DTO
+		String reviewAuthId = null; // 회사 인증 순번
+		int count = 0; // 해당 순번이 회사인증 요청 목록에 존재하는지 확인하기 위한 카운트
+		String yn = null; // 요청에 대한 허가/거부 입력 문자열
+		int result = 0; // DML 쿼리 결과
+
+		if (reviewAuthList.size() < 1) {
+			System.out.println(">> 현재 요청중인 회사인증이 없습니다. <<\n");
+			return;
+		}
+
+		while (true) {
+			System.out.print("▷ 순번 입력 : ");
+			reviewAuthId = sc.nextLine();
+
+			// 순번 유효성 검사
+			if (!ValidationUtil.isNumberValid(reviewAuthId)) {
+				continue;
+			}
+
+			break;
+		}
+
+		// 회사인증 목록을 순회하며 해당 순번에 포함된 회사인증이 존재하는지 확인
+		for (ReviewAuthDTO reviewAuthDTO : reviewAuthList) {
+			if (reviewAuthDTO.getReviewAuthId() == Integer.parseInt(reviewAuthId)) {
+				count++;
+			}
+		}
+
+		if (count != 1) {
+			System.out.println(">> 입력하신 순번 " + reviewAuthId + "에 해당하는 회사인증 요청 건이 존재하지 않습니다. <<");
+			return;
+		}
+
+		while (true) {
+			System.out.print("▷ 회사인증을 허가하시겠습니까?[Y(허가)/N(거부)] : ");
+			yn = sc.nextLine();
+
+			if (!ValidationUtil.isYNValid(yn)) {
+				continue;
+			}
+
+			break;
+		}
+
+		// 허용이면 1 거부이면 2를 적용한다.
+		int status = "y".equalsIgnoreCase(yn) ? 1 : 2;
+		
+		newReviewAuthDTO.setIsPermitted(status);
+		newReviewAuthDTO.setReviewAuthId(Integer.parseInt(reviewAuthId));
+		
+		result = reviewAuthDAO.manageRequest(newReviewAuthDTO);
+
+		if (result == 1) {
+			System.out.println(">> 회사인증 처리가 완료되었습니다. ദ്ദി*ˊᗜˋ*) <<\n");
+		} else {
+			System.out.println(">> 회사인증 처리를 실패하였습니다. <<\n");
+		}
+	}
+
+	/*
+	 * 현재 대기중인 회사 인증 요청 목록 조회 및 목록 반환
+	 */
+	private List<ReviewAuthDTO> getReqReviewAuthList() {
+		List<ReviewAuthDTO> reviewAuthList = new ArrayList<>();
+		sb.setLength(0); // StringBuilder 초기화
+
+		System.out.println("\n-< 현재 대기중인 회사 인증 요청 목록 >" + "-".repeat(30));
+		System.out.println("순번\t구직자 성명\t구직자 아이디\t회사명\t회사아이디");
+		System.out.println("-".repeat(60));
+
+		// ReviewAuthDAO_imple로부터 회사 인증 요청 목록 반환
+		reviewAuthList = reviewAuthDAO.getReqReviewAuthList();
+
+		for (ReviewAuthDTO reviewAuthDTO : reviewAuthList) {
+			sb.append(reviewAuthDTO.getReviewAuthId() + "\t");
+			sb.append(reviewAuthDTO.getApplicantName() + "\t");
+			sb.append(reviewAuthDTO.getFkApplicantId() + "\t");
+			sb.append(reviewAuthDTO.getCompanyName() + "\t");
+			sb.append(reviewAuthDTO.getFkCompanyId() + "\n");
+		}
+
+		System.out.println(sb.toString());
+
+		return reviewAuthList;
+	}
+
+	/*
 	 * 생일에서 나이를 반환하는 메소드
 	 */
 	private int getAge(String birthday) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Calendar cal = Calendar.getInstance();
+		int thisYear = cal.get(Calendar.YEAR); // 이번년도
+		String thisYearBirthDay = thisYear + birthday.substring(4); // 올해생일
 
-		return 0;
+		int age = 0; // 나이
+		Date today = new Date();
+
+		Date birth; // 생년월일
+		Date thisYearBirth; // 올해생일
+		try {
+			birth = sdf.parse(birthday); // 생년월일 Date 객체
+			cal.setTime(birth);
+			age = thisYear - cal.get(Calendar.YEAR); // 이번년도 - 태어난 년도
+
+			thisYearBirth = sdf.parse(thisYearBirthDay); // 올해 생일 Date 객체
+
+			// 만나이 처리
+			if (thisYearBirth.after(today)) {
+				age -= 1;
+			}
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return age;
 	}
 }

@@ -19,4 +19,10 @@ public interface ReviewAuthDAO {
 	// === 회사인증 insert === //
 	int registerReviewAuth(ReviewAuthDTO reviewAuthDTO);
 
+	// === 회사인증 요청 목록 조회 === //
+	List<ReviewAuthDTO> getReqReviewAuthList();
+
+	// === 회사인증 요청 허가/거부 === //
+	int manageRequest(ReviewAuthDTO reviewAuthDTO);
+	
 }

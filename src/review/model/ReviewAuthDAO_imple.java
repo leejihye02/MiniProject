@@ -18,8 +18,7 @@ public class ReviewAuthDAO_imple implements ReviewAuthDAO {
 	private Connection conn = ProjectDBConnection.getConn();
 	private PreparedStatement pstmt;
 	private ResultSet rs;
-	
-	
+
 	// method
 	// === 자원반납 === //
 	private void close() {
@@ -100,6 +99,71 @@ public class ReviewAuthDAO_imple implements ReviewAuthDAO {
 		}
 		
 		return result;
+	}
+
+
+	// === 회사인증 요청 목록 조회 === //
+	@Override
+	public List<ReviewAuthDTO> getReqReviewAuthList() {
+		List<ReviewAuthDTO> reviewAuthList = new ArrayList<>();
+		ReviewAuthDTO reviewAuthDTO = null;
+
+		try {
+			String sql = " select r.review_auth_id, a.name as applicant_name, r.fk_applicant_id, c.name as company_name, r.fk_company_id "
+					+ " from tbl_review_auth r join tbl_applicant a on r.fk_applicant_id = a.applicant_id "
+					+ " join tbl_company c on r.fk_company_id = c.company_id " + " where is_permitted = 0 ";
+
+			pstmt = conn.prepareStatement(sql);
+
+			rs = pstmt.executeQuery(); // sql문 실행
+
+			while (rs.next()) {
+
+				reviewAuthDTO = new ReviewAuthDTO();
+
+				reviewAuthDTO.setReviewAuthId(rs.getInt("review_auth_id"));
+				reviewAuthDTO.setApplicantName(rs.getString("applicant_name"));
+				reviewAuthDTO.setFkApplicantId(rs.getString("fk_applicant_id"));
+				reviewAuthDTO.setCompanyName(rs.getString("company_name"));
+				reviewAuthDTO.setFkCompanyId(rs.getString("fk_company_id"));
+
+				reviewAuthList.add(reviewAuthDTO);
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+
+		return reviewAuthList;
+	}
+
+	
+	// === 회사인증 요청 허가/거부 === // 
+	@Override
+	public int manageRequest(ReviewAuthDTO reviewAuthDTO) {
+
+		int result = 0;
+
+		try {
+			String sql = " update tbl_review_auth set is_permitted = ? where review_auth_id = ? ";
+
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, reviewAuthDTO.getIsPermitted());
+			pstmt.setInt(2, reviewAuthDTO.getReviewAuthId());
+
+			result = pstmt.executeUpdate(); // sql문 실행
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+
+		return result;
+
 	}
 
 }
