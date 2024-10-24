@@ -55,7 +55,7 @@ public class JobController {
 
 
 	// *** 희망직종 목록을 보여주고 값을 뱉는 메소드 *** //
-	public int jobUpdateList(RecruitmentDTO recruitmentDTO, Scanner sc) {
+	public int jobUpdateList(int oldJobId, Scanner sc) {
 			
 		jobListArray(); // 희망직종을 표 3 * 7 형태로 정렬
 		
@@ -66,7 +66,7 @@ public class JobController {
 			String put_fk_job_id = sc.nextLine();
 			
 			if(put_fk_job_id.isBlank()) {
-				fk_job_id = recruitmentDTO.getJobdto().getJob_id();
+				fk_job_id = oldJobId;
 				break;
 			}
 
