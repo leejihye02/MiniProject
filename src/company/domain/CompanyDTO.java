@@ -17,10 +17,11 @@ public class CompanyDTO {
 	private String tel;  			//연락처
 	private String industry;   		//업종
 	private int	status;				//가입상태
+	private String progress;		//채용진행상황
 	
 	//select용 feild
 	
-	private String businessTypeStr; //기업형태 대기업 중견기업 중소기업
+	
 	
 	
 	
@@ -106,13 +107,30 @@ public class CompanyDTO {
 	}
 	
 	
+	
+	
+	
 	//select용
 	
-	public void setBusinessTypeStr(String businessTypeStr) {
-		this.businessTypeStr = businessTypeStr;
-	}
+	
 	public String getBusinessTypeStr() {
-		return businessTypeStr;
+		if(businessType == 0) {
+			return "대기업";
+		}
+		else if (businessType == 1) {
+			return "중견기업";
+		}
+		else {
+			return "중소기업";
+		}
+	}
+	
+	
+	public String getProgress() {
+		return progress;
+	}
+	public void setProgress(String progress) {
+		this.progress = progress;
 	}
 
 	
@@ -123,13 +141,17 @@ public class CompanyDTO {
 				+ "▣ 이메일 : " +email + "\n"
 				+ "▣ 회사명 : " + name +"\n"
 				+ "▣ 사업자등록번호 : " + businessNo+"\n"
-				+ "▣ 기업형태 : " + businessTypeStr + "\n"
+				+ "▣ 기업형태 : " + getBusinessTypeStr()+ "\n"
 				+ "▣ 주소 : " + address + "\n"
 				+ "▣ 연락처 : " + tel + "\n"
 				+ "▣ 업종 : " + industry+"";
 	}
 
+	public String companyInfo() {
+		return name+"\t  "+industry+"\t"+address+"\t"+businessNo+"\t"+progress;
+	}
 
-
+	
+	
 	
 }
