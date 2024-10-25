@@ -177,10 +177,10 @@ public class CompanyDAO_imple implements CompanyDAO {
 	    List<CompanyDTO> companyNameList = new ArrayList<>();
 	    
 	    try {
-	        String sql = " select name, industry, business_no, address, "
+	        String sql = " select name, industry, business_no, address, status, email, company_id, tel, "
 	                   + " case when progress is null then '채용없음' else progress end as progress "
 	                   + " from ("
-	                   + "    select name, industry, business_no, address, company_Id "
+	                   + "    select name, industry, business_no, address, company_Id, status, email, tel"
 	                   + "    from tbl_company "
 	                   + "    where upper(name) like  upper(?) "
 	                   + " ) C "
@@ -206,6 +206,10 @@ public class CompanyDAO_imple implements CompanyDAO {
 	            companyDTO.setBusinessNo(rs.getString("business_no"));
 	            companyDTO.setAddress(rs.getString("address"));
 	            companyDTO.setProgress(rs.getString("progress"));
+	        	companyDTO.setStatus(rs.getInt("status"));
+	        	companyDTO.setEmail(rs.getString("email"));
+	        	companyDTO.setCompanyId(rs.getString("company_id"));
+	        	companyDTO.setTel(rs.getString("tel"));
 	            
 	            companyNameList.add(companyDTO);  // 리스트에 추가
 	        }
@@ -232,10 +236,10 @@ public class CompanyDAO_imple implements CompanyDAO {
 		List<CompanyDTO>companyIndustryList = new ArrayList<>();
 		
 		try {
-			String sql = " select name, industry, business_no, address, "
+			String sql = " select name, industry, business_no, address, status, email, company_id, tel, "
 					+ " case when progress is null then '채용없음' else progress end as progress "
 					+ " from ("
-					+ " select  name, industry, business_no, address, company_Id "
+					+ " select  name, industry, business_no, address, company_Id, status, email, tel "
 					+ " from tbl_company "
 					+ " where  upper(industry) like upper(?) "
 					+ " )C "
@@ -262,7 +266,11 @@ public class CompanyDAO_imple implements CompanyDAO {
 			companyDTO.setBusinessNo(rs.getString("business_no"));
 			companyDTO.setAddress(rs.getString("address"));
 			companyDTO.setProgress(rs.getString("progress"));
-			
+			companyDTO.setStatus(rs.getInt("status"));
+        	companyDTO.setEmail(rs.getString("email"));
+        	companyDTO.setCompanyId(rs.getString("company_id"));
+        	companyDTO.setTel(rs.getString("tel"));
+        	
 			companyIndustryList.add(companyDTO); 
 		}
 		
@@ -287,10 +295,10 @@ public class CompanyDAO_imple implements CompanyDAO {
 		List<CompanyDTO>  companyAddressList = new ArrayList<>();
 		
 		try {
-			String sql = " select name, industry, business_no, address, "
+			String sql = " select name, industry, business_no, address, status, email, company_id, tel, "
 					+ " case when progress is null then '채용없음' else progress end as progress "
 					+ " from ( "
-					+ " select  name, industry, business_no, address, company_Id "
+					+ " select  name, industry, business_no, address, company_Id, status, email, tel "
 					+ " from tbl_company "
 					+ " where upper(address) like upper(?) "
 					+ " )C "
@@ -317,8 +325,12 @@ public class CompanyDAO_imple implements CompanyDAO {
 			companyDTO.setBusinessNo(rs.getString("business_no"));
 			companyDTO.setAddress(rs.getString("address"));
 			companyDTO.setProgress(rs.getString("progress"));
+			companyDTO.setStatus(rs.getInt("status"));
+        	companyDTO.setEmail(rs.getString("email"));
+        	companyDTO.setCompanyId(rs.getString("company_id"));
+        	companyDTO.setTel(rs.getString("tel"));
 			
-			 companyAddressList.add(companyDTO); 
+			companyAddressList.add(companyDTO); 
 		}
 		
 		

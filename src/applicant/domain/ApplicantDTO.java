@@ -91,7 +91,7 @@ public class ApplicantDTO {
 		+ " ▣ 생일 : " + birthday + "\n"
 		+ " ▣ 성별 : " + Transaction.gender(gender) + "\n"
 		+ " ▣ 휴대폰번호 : " + tel + "\n"
-		+ " ▣ 가입상태 : " + Transaction.applicantStatus(status) 
+		+ " ▣ 가입상태 : " + Transaction.memberStatus(status) 
 		+ "\n-------------------------------------------------\n";
 	}
 }
