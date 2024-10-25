@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -168,6 +169,41 @@ public class CompanyDAO_imple implements CompanyDAO {
 		
 		return result;
 	}// end of public int cpInfoUpdate(Map<String, String> paraMap) 
+
+
+
+
+	// 기업형태별 회사 통계
+	@Override
+	public Map<String, Integer> getBusinessTypeRatio() {
+		Map<String, Integer> map = new HashMap<>(); // "big" : 대기업, "mid" : 중견기업, "small" : 중소기업
+		
+		map.put("0", 0); // 대기업
+		map.put("1", 0); // 중견기업
+		map.put("2", 0); // 중소기업
+		
+		try {
+			String sql 	= " select decode(business_type, 0, 'big', 1, 'mid', 2, 'small', 'total') as business_type, count(*) as count "
+						+ " from tbl_company "
+						+ " group by rollup(business_type) ";  
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			rs = pstmt.executeQuery(); // sql문 실행
+			
+			// total, big, mid, small
+			while(rs.next()) {
+				map.put(rs.getString("business_type"), rs.getInt("count"));
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		return map;
+	}
 	
 
 	

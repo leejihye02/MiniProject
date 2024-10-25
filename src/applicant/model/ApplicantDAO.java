@@ -25,4 +25,7 @@ public interface ApplicantDAO {
 	// == 구직자 차단 관리 == //
 	public int blockApplicant(String applicantId, boolean block);
 
+	// == 구직자 성별 통계 == //
+	public Map<String, Integer> getGenderRatio();
+
 }

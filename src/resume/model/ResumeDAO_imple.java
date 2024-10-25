@@ -4,10 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import applicant.domain.ApplicantDTO;
-import apply.model.ApplyDAO;
 import common.ProjectDBConnection;
 import job.domain.JobDTO;
 import resume.domain.ResumeDTO;
@@ -198,6 +200,115 @@ public class ResumeDAO_imple implements ResumeDAO{
 	}
 	
 	
+	// *** 구직자 경력 통계 *** //
+	@Override
+	public Map<String, Integer> getExperienceRatio() {
+		Map<String, Integer> map = new HashMap<>();
+		
+		map.put("junior", 0);
+		map.put("senior", 0);
+		map.put("total", 0);
+		
+		try {
+			String sql 	= " select decode(experience, 0, 'junior', 1, 'senior', 'total') as experience, count(*) as count "
+						+ " from tbl_resume "
+						+ " group by rollup(experience) ";  
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			rs = pstmt.executeQuery(); // sql문 실행
+			
+			// total, junior, senior
+			while(rs.next()) {
+				map.put(rs.getString("experience"), rs.getInt("count"));
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		return map;
+	}
+
+
+	// *** 구직자 학력 통계 *** //
+	@Override
+	public Map<String, Integer> getEducationRatio() {
+		Map<String, Integer> map = new HashMap<>();
+		
+		map.put("0", 0);
+		map.put("1", 0);
+		map.put("2", 0);
+		map.put("3", 0);
+		map.put("4", 0);
+		
+		try {
+			String sql 	= " select nvl(to_char(education), 'total') as experience, count(*) as count "
+						+ " from tbl_resume "
+						+ " group by rollup(education) ";  
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			rs = pstmt.executeQuery(); // sql문 실행
+			
+			// total, junior, senior
+			while(rs.next()) {
+				map.put(rs.getString("experience"), rs.getInt("count"));
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		return map;
+	}
+
+
+	// *** 구직자 인기 희망직종 통계 *** //
+	@Override
+	public List<String[]> getHopeJobRatio() {
+		List<String[]> list = new ArrayList<>(); // String[0] = [순위], String[1] = [직종명], String[2] = [비율]
+		
+		try {
+			String sql 	= " select * "
+						+ " from "
+						+ " ( "
+						+ " 	select j.name, round(count(*) / t.total * 100) as ratio, dense_rank() over (order by count(*) desc) as rank "
+						+ "     from "
+						+ "		("
+						+ "		 	select count(*) as total from tbl_resume "
+						+ "		) t "
+						+ " 	cross join tbl_resume r "
+						+ " 	join tbl_job j on r.fk_job_id = j.job_id "
+						+ " 	group by j.name, t.total "
+						+ " ) "
+						+ " where rownum <= 10 ";
+			   
+			pstmt = conn.prepareStatement(sql);
+			
+			rs = pstmt.executeQuery(); // sql문 실행
 	
+			while(rs.next()) {
+				String[] arr = new String[3]; // String[0] = [순위], String[1] = [직종명], String[2] = [비율]
+				
+				arr[0] = rs.getString("rank");
+				arr[1] = rs.getString("name");
+				arr[2] = rs.getString("ratio");
+				
+ 				list.add(arr);
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		return list;
+	}
 
 }
