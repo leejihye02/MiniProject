@@ -101,7 +101,7 @@ public class NotificationDTO {
 	 */
 	@Override
 	public String toString() {
-		return "-< " + notificationId + "번 공지사항 >--------------------------------------\n"
+		return "-< " + notificationId + "번 공지사항 >-------------------------------------\n"
 				+ " ▣ 제목 : " + (fix == 1 ? "[★]" : "") + title + "\n"
 				+ " ▣ 내용 : " + (contents == null ? "" : contents) + "\n"
 				+ " ▣ 작성자 : " + (adminName == null ? "관리자" : adminName) + "\n"
