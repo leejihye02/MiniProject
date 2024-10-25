@@ -140,8 +140,8 @@ public class Transaction {
 		return genderType == 0 ? "남" : "여";
 	}
 	
-	// int 타입인 구직자 계정 상태를 반환 
-	public static String applicantStatus(int status) {
+	// int 타입인 회원 계정 상태를 반환 
+	public static String memberStatus(int status) {
 		String strStatus = null;
 
 		switch (status) {

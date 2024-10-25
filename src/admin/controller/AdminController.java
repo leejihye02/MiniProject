@@ -17,6 +17,9 @@ import applicant.domain.ApplicantDTO;
 import applicant.model.ApplicantDAO;
 import applicant.model.ApplicantDAO_imple;
 import common.Transaction;
+import company.domain.CompanyDTO;
+import company.model.CompanyDAO;
+import company.model.CompanyDAO_imple;
 import notification.controller.NotificationController;
 import review.domain.ReviewAuthDTO;
 import review.model.ReviewAuthDAO;
@@ -35,6 +38,8 @@ public class AdminController {
 	private final ApplicantDAO applicantDAO = new ApplicantDAO_imple(); // ApplicantDAO 구현체
 
 	private final ReviewAuthDAO reviewAuthDAO = new ReviewAuthDAO_imple(); // ReviewAuthDAO 구현체
+	
+	private final CompanyDAO companyDAO = new CompanyDAO_imple(); // CompanyDAO 구현체
 
 	private final NotificationController notificationController = new NotificationController(); // 공지사항 Controller 인스턴스
 	
@@ -118,7 +123,7 @@ public class AdminController {
 				break;
 			}
 			case "4": { // 공지사항 관리
-				notificationController.notificationMenu(adminDTO, sc);
+				notificationController.notificationMenu(adminDTO, true, sc);
 				break;
 			}
 			case "5": { // 통계
@@ -185,11 +190,11 @@ public class AdminController {
 		String menu = null; // 메뉴번호
 
 		do {
-			System.out.println("=== 구인회사 관리 ===");
+			System.out.println("\n=== 구인회사 관리 ===");
 
-			System.out.println("=====================< 카테고리별 검색 메뉴 >========================");
+			System.out.println("=====================< 메뉴 >========================");
 			System.out.println("1.회사명\t2.업종별\t3.지역별\t0.돌아가기");
-			System.out.println("================================================================");
+			System.out.println("====================================================");
 
 			System.out.print("▷ 메뉴번호 선택 : ");
 			menu = sc.nextLine();
@@ -199,12 +204,15 @@ public class AdminController {
 				return;
 			}
 			case "1": { // 회사명
+				getCompanyByName(sc);
 				break;
 			}
 			case "2": { // 업종별
+				getCompanyByIndustry(sc);
 				break;
 			}
 			case "3": { // 지역별
+				getCompanyByAddr(sc);
 				break;
 			}
 			default:
@@ -212,7 +220,7 @@ public class AdminController {
 			}
 		} while (!"0".equals(menu));
 	}
-	
+
 	/*
 	 * 구직자 회사 인증 관리 (구직자의 재직 이력 인증)
 	 */
@@ -325,7 +333,7 @@ public class AdminController {
 			sb.append(getAge(applicantDTO.getBirthday()) + "\t");
 			sb.append(Transaction.gender(applicantDTO.getGender()) + "\t");
 			sb.append(applicantDTO.getTel() + "\t");
-			sb.append(Transaction.applicantStatus(applicantDTO.getStatus()) + "\n");
+			sb.append(Transaction.memberStatus(applicantDTO.getStatus()) + "\n");
 		}
 
 		System.out.println(sb.toString());
@@ -379,6 +387,66 @@ public class AdminController {
 		else {
 			System.out.println(">> 구직자 아이디 " + applicantId + "의 " + isblock + "(을)를 실패하였습니다. <<\n");
 		}
+	}
+	
+	/*
+	 * 회사명으로 회사 검색
+	 */
+	private void getCompanyByName(Scanner sc) {
+		String companyName = null; // 회사명
+		List<CompanyDTO> companyList = new ArrayList<>();
+		
+		System.out.print("▷ 회사명 입력 : ");
+		companyName = sc.nextLine();
+		
+		companyList = companyDAO.companyNameList(companyName);
+		
+		if(companyList.size() < 1) {
+			System.out.println(">> 조회된 결과가 없습니다. <<\n");
+			return;
+		}
+		
+		companyInfo(companyList);
+	}
+	
+	/*
+	 * 업종명으로 회사 검색
+	 */
+	private void getCompanyByIndustry(Scanner sc) {
+		String businessType = null; // 업종명
+		List<CompanyDTO> companyList = new ArrayList<>();
+		
+		System.out.print("▷ 업종명 입력 : ");
+		businessType = sc.nextLine();
+		
+		companyList = companyDAO.companyIndustryList(businessType);
+		
+		if(companyList.size() < 1) {
+			System.out.println(">> 조회된 결과가 없습니다. <<\n");
+			return;
+		}
+		
+		companyInfo(companyList);
+	}
+	
+	/*
+	 * 주소로 회사 검색
+	 */
+	private void getCompanyByAddr(Scanner sc) {
+		String addr = null; // 회사명
+		List<CompanyDTO> companyList = new ArrayList<>();
+		
+		System.out.print("▷ 주소 입력 : ");
+		addr = sc.nextLine();
+		
+		companyList = companyDAO.companyAddressList(addr);
+		
+		if(companyList.size() < 1) {
+			System.out.println(">> 조회된 결과가 없습니다. <<\n");
+			return;
+		}
+		
+		companyInfo(companyList);
 	}
 
 	/*
@@ -501,5 +569,28 @@ public class AdminController {
 			e.printStackTrace();
 		}
 		return age;
+	}
+	
+	/*
+	 * 회사 목록 출력
+	 */
+	private void companyInfo(List<CompanyDTO> companyList) {
+		sb.setLength(0);
+
+		for(CompanyDTO companyDTO : companyList) {
+			sb.append("-------------------------------------------------\n"	  
+						+ "▣ 아이디 : " + companyDTO.getCompanyId() + "\n"
+						+ "▣ 이메일 : " + companyDTO.getEmail() + "\n"
+						+ "▣ 회사명 : " + companyDTO.getName() + "\n"
+						+ "▣ 사업자등록번호 : " + companyDTO.getBusinessNo() + "\n"
+						+ "▣ 기업형태 : " + companyDTO.getBusinessTypeStr() + "\n"
+						+ "▣ 주소 : " + companyDTO.getAddress() + "\n"
+						+ "▣ 연락처 : " + companyDTO.getTel() + "\n"
+						+ "▣ 업종 : " + companyDTO.getIndustry() + "\n"
+						+ "▣ 가입상태 : " + Transaction.memberStatus(companyDTO.getStatus()) + "\n"
+						+ "-------------------------------------------------\n"
+					);
+		}
+		System.out.println("\n" + sb.toString());
 	}
 }

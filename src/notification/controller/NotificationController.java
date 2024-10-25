@@ -19,20 +19,22 @@ public class NotificationController {
 	private StringBuilder sb = new StringBuilder(); // StringBuilder 객체
 
 	/*
-	 * 공지 관리 메뉴
+	 * 관리자 : 공지 관리 메뉴, 일반 사용자 : 공지 조회 메뉴 
 	 */
-	public void notificationMenu(AdminDTO adminDTO, Scanner sc) {
+	public void notificationMenu(AdminDTO adminDTO, boolean isAdmin, Scanner sc) {
 		String menu = null; // 메뉴번호
+		String menuButton= isAdmin ? "1.공지사항 등록   2.공지사항 상세보기   0.돌아가기" : "1.공지사항 상세보기   0.돌아가기";
+		String menuTitle = isAdmin ? "공지사항 관리 메뉴" : "공지사항 조회 메뉴";
 
 		do {
 			sb.setLength(0); // StringBuilder 초기화
-			System.out.println("\n=== 공지사항 관리 ===");
+			System.out.println("\n=== 공지사항 ===");
 
 			// 공지사항 리스트 출력
-			getNotificationList(true);
+			getNotificationList(isAdmin);
 
-			System.out.println("==================< 공지사항 관리 메뉴 >=====================");
-			System.out.println("1.공지사항 등록   2.공지사항 상세보기   0.돌아가기");
+			System.out.println("==================< " + menuTitle + " >=====================");
+			System.out.println(menuButton);
 			System.out.println("=========================================================");
 
 			System.out.print("▷ 메뉴번호 선택 : ");
@@ -42,13 +44,20 @@ public class NotificationController {
 			case "0": { // 돌아가기
 				return;
 			}
-			case "1": { // 공지사항 등록
-				registerNotification(adminDTO, sc);
+			case "1": { // 관리자 : 공지사항 등록, 일반 사용자 : 공지사항 상세보기
+				if(isAdmin) {
+					registerNotification(adminDTO, sc);
+				}
+				else {
+					getNotificationDetails(isAdmin, sc);
+				}
 				break;
 			}
 			case "2": { // 공지사항 상세보기
-				getNotificationDetails(true, sc);
-				break;
+				if(isAdmin) {
+					getNotificationDetails(isAdmin, sc);
+					break;
+				}
 			}
 			default:
 				Msg.W("메뉴에 없는 번호입니다.");
