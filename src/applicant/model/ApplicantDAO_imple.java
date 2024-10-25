@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -109,7 +110,7 @@ public class ApplicantDAO_imple implements ApplicantDAO {
 		List<ApplicantDTO> applicantList = new ArrayList<>();
 		
 		try {
-			String sql = " select applicant_id, passwd, email, name, birthday, gender, tel, status "
+			String sql = " select applicant_id, passwd, email, name, to_char(birthday,'yyyy-mm-dd') as birthday, gender, tel, status "
 					   + " from tbl_applicant "
 					   + " where name = ? ";
 			
@@ -153,7 +154,7 @@ public class ApplicantDAO_imple implements ApplicantDAO {
 		
 		// 만나이 기준으로 나이대 검사
 		try {
-			String sql = " select applicant_id, name, birthday, gender, tel, status "
+			String sql = " select applicant_id, name, to_char(birthday,'yyyy-mm-dd') as birthday, gender, tel, status "
 					   + " from tbl_applicant "
 					   + " where trunc(extract(year from sysdate) - extract(year from birthday) "
 					   + " + case when to_char(birthday, 'mmdd') > to_char(sysdate, 'mmdd') then -1 else 0 end, -1) = ?";
@@ -194,7 +195,7 @@ public class ApplicantDAO_imple implements ApplicantDAO {
 		ApplicantDTO applicantDTO = null;
 		
 		try {
-			String sql = " select applicant_id, passwd, email, name, birthday, gender, tel, status "
+			String sql = " select applicant_id, passwd, email, name, to_char(birthday,'yyyy-mm-dd') as birthday, gender, tel, status "
 					   + " from tbl_applicant "
 					   + " where applicant_id = ? ";
 			
@@ -236,7 +237,22 @@ public class ApplicantDAO_imple implements ApplicantDAO {
 		int status = block ? 2 : 1;
 		
 		try {
-			String sql = " update tbl_applicant set status = ? "
+			// 구직자 상태가 이미 차단/해제되었는지 확인하는 쿼리
+			String sql = " select count(*) as count from tbl_applicant where applicant_id = ? and status = ? ";
+			
+			pstmt  = conn.prepareStatement(sql);
+			pstmt.setString(1, applicantId);
+			pstmt.setInt(2, status);
+			
+			rs = pstmt.executeQuery();
+			rs.next();
+			
+			// 이미 처리된 구직자 상태이면 2를 반환
+			if(rs.getInt("count") == 1) {
+				return 2;
+			}
+			
+			sql = " update tbl_applicant set status = ? "
 					   + " where applicant_id = ? ";
 			
 			pstmt = conn.prepareStatement(sql);
@@ -252,5 +268,38 @@ public class ApplicantDAO_imple implements ApplicantDAO {
 		}
 		
 		return result;
+	}
+
+	// == 구직자 성별 통계 == //
+	@Override
+	public Map<String, Integer> getGenderRatio() {
+		Map<String, Integer> map = new HashMap<>();
+		
+		map.put("men", 0);
+		map.put("women", 0);
+		map.put("total", 0);
+		
+		try {
+			String sql 	= " select decode(gender, 0, 'men', 1, 'women', 'total') as gender, count(*) as count "
+						+ " from tbl_applicant "
+						+ " where status = 1 "
+						+ " group by rollup(gender) "; 
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			rs = pstmt.executeQuery(); // sql문 실행
+			
+			// total, men, women
+			while(rs.next()) {
+				map.put(rs.getString("gender"), rs.getInt("count"));
+			}
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+		
+		return map;
 	}
 }

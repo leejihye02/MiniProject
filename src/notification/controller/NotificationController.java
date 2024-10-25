@@ -26,14 +26,14 @@ public class NotificationController {
 
 		do {
 			sb.setLength(0); // StringBuilder 초기화
-			System.out.println("=== 공지사항 관리 ===");
+			System.out.println("\n=== 공지사항 관리 ===");
 
 			// 공지사항 리스트 출력
 			getNotificationList(true);
 
-			System.out.println("=====================< 메뉴 >========================");
-			System.out.println("1.공지사항 등록\t2.공지사항 상세보기\t0.돌아가기");
-			System.out.println("====================================================");
+			System.out.println("==================< 공지사항 관리 메뉴 >=====================");
+			System.out.println("1.공지사항 등록   2.공지사항 상세보기   0.돌아가기");
+			System.out.println("=========================================================");
 
 			System.out.print("▷ 메뉴번호 선택 : ");
 			menu = sc.nextLine();
@@ -63,6 +63,7 @@ public class NotificationController {
 	public void getNotificationList(boolean isAdmin) {
 		// notificationDAO_imple로부터 공지사항 리스트 반환
 		List<NotificationDTO> noticeList = notificationDAO.getNotificationList(isAdmin);
+		String tab = ""; // 출력 간격을 조정하기 위한 tab
 
 		// 공지사항이 존재하지 않는 경우
 		if (noticeList.size() < 1) {
@@ -70,18 +71,25 @@ public class NotificationController {
 			return;
 		}
 
-		System.out.println("\n-< 공지사항 목록 >" + "-".repeat(30));
-		System.out.println("순번  제목 \t\t 작성자   작성일");
-		System.out.println("-".repeat(45));
+		System.out.println("\n-< 공지사항 목록 >" + "-".repeat(44));
+		System.out.println("순번\t제목\t\t\t\t작성자\t작성일");
+		System.out.println("-".repeat(59));
 
 		// 공지사항이 존재하는 경우 StringBuilder에 저장
 		for (NotificationDTO notificationDTO : noticeList) {
 
 			// 고정 여부는 제목 앞에 ★ 표시
 			String fixed = notificationDTO.getFix() == 1 ? "[★] " : "";
+			if (notificationDTO.getTitle().length() < 9) {
+				tab = "\t\t\t";
+			} else if (notificationDTO.getTitle().length() < 13) {
+				tab = "\t\t";
+			} else {
+				tab = "\t";
+			}
 
-			sb.append(notificationDTO.getNotificationId() + "    ");
-			sb.append(fixed + notificationDTO.getTitle() + "\t");
+			sb.append(notificationDTO.getNotificationId() + "\t");
+			sb.append(fixed + notificationDTO.getTitle() + tab);
 			sb.append((notificationDTO.getAdminName() == null ? "관리자" : notificationDTO.getAdminName()) + "\t");
 			sb.append(notificationDTO.getRegisterday() + "\n");
 		}
@@ -169,7 +177,6 @@ public class NotificationController {
 		NotificationDTO notificationDTO = null; // NotificationDTO 객체 초기화
 
 		while (true) {
-			System.out.println("\n=== 공지사항 상세보기 ===\n");
 			// 공지사항에 대한 공지 번호 입력
 			System.out.print("▷ 공지사항 번호 입력 : ");
 			no = sc.nextLine();
@@ -179,6 +186,10 @@ public class NotificationController {
 				continue;
 			}
 
+			break;
+		}
+
+		if(!isAdmin) {
 			// NotificationDAO_imple 로부터 공지사항 상세내역 반환
 			notificationDTO = notificationDAO.getNotificationDetails(isAdmin, Integer.parseInt(no));
 
@@ -188,23 +199,27 @@ public class NotificationController {
 				return;
 			}
 
-			break;
+			// 공지사항 상세내역 출력
+			System.out.println("\n=== 공지사항 상세보기 ===\n");
+			System.out.println(notificationDTO.toString());
 		}
-
-		// 공지사항 상세내역 출력
-		System.out.println(notificationDTO.toString());
-
-		String menu = null;
 		// 관리자만 접근 가능한 공지사항 수정, 삭제 메뉴
-		if (isAdmin) {
+		else {
+			String menu = null;
 			do {
-				System.out.println("=====================< 메뉴 >========================");
+				
+				notificationDTO = notificationDAO.getNotificationDetails(isAdmin, Integer.parseInt(no));
+				
+				System.out.println("\n=== 공지사항 상세보기 ===\n");
+				System.out.println(notificationDTO.toString());
+				
+				System.out.println("================< 공지사항 수정 메뉴 >==================");
 				System.out.println("1.공지사항 수정\t2.공지사항 삭제\t0.돌아가기");
 				System.out.println("====================================================");
 
 				System.out.print("▷ 메뉴번호 선택 : ");
 				menu = sc.nextLine();
-				
+
 				switch (menu) {
 				case "0": { // 공지사항 관리 메뉴로 돌아가기
 					return;
@@ -215,7 +230,7 @@ public class NotificationController {
 				}
 				case "2": { // 공지사항 삭제
 					deleteNotification(no, sc);
-					break;
+					return;
 				}
 				default:
 					Msg.W("메뉴에 없는 번호입니다.");

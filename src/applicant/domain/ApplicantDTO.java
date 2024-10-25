@@ -1,5 +1,7 @@
 package applicant.domain;
 
+import common.Transaction;
+
 public class ApplicantDTO {
 	
 	// field
@@ -82,35 +84,14 @@ public class ApplicantDTO {
 	// 구직자 상세보기 출력
 	@Override
 	public String toString() {
-		return "-< " + name + "님 >---------------------------------------\n"
+		return "-< " + name + "님 >--------------------------------------\n"
 		+ " ▣ 아이디 : " + applicantId + "\n"
 		+ " ▣ 비밀번호 : " + passwd + "\n"
 		+ " ▣ 이메일 : " + email + "\n"
 		+ " ▣ 생일 : " + birthday + "\n"
-		+ " ▣ 성별 : " + gender + "\n"
+		+ " ▣ 성별 : " + Transaction.gender(gender) + "\n"
 		+ " ▣ 휴대폰번호 : " + tel + "\n"
-		+ " ▣ 가입상태 : " + transStatus() + "\n--------------------------------------------------\n";
-	}
-	
-	/*
-	 * 구직자 계정 상태를 반환 0 : 탈퇴, 1 : 가입, 2 : 차단
-	 */
-	public String transStatus() {
-		String applicantStatus = null;
-
-		switch (status) {
-		case 0:
-			applicantStatus = "탈퇴";
-			break;
-		case 1:
-			applicantStatus = "가입";
-			break;
-		case 2:
-			applicantStatus = "차단";
-			break;
-		default:
-			break;
-		}
-		return applicantStatus;
+		+ " ▣ 가입상태 : " + Transaction.applicantStatus(status) 
+		+ "\n-------------------------------------------------\n";
 	}
 }

@@ -1,5 +1,6 @@
 package resume.model;
 
+import java.util.List;
 import java.util.Map;
 
 import applicant.domain.ApplicantDTO;
@@ -21,6 +22,15 @@ public interface ResumeDAO {
 
 	// *** 이력서 수정 *** //
 	int modifyResume(ResumeDTO resumeDTO,ApplicantDTO applicant);
+
+	// *** 구직자 경력 통계 *** //
+	Map<String, Integer> getExperienceRatio();
+
+	// *** 구직자 학력 통계 *** //
+	Map<String, Integer> getEducationRatio();
+
+	// *** 구직자 인기 희망직종 통계 *** //
+	List<String[]> getHopeJobRatio();
 
 	
 

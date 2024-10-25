@@ -135,6 +135,31 @@ public class Transaction {
 	} // end of public static String salary(int salary)-------------------
 	
 	
+	// 입력받은 성별 int 타입을 '남', '여'로 변환해주는 메소드
+	public static String gender(int genderType) {
+		return genderType == 0 ? "남" : "여";
+	}
+	
+	// int 타입인 구직자 계정 상태를 반환 
+	public static String applicantStatus(int status) {
+		String strStatus = null;
+
+		switch (status) {
+		case 0:
+			strStatus = "탈퇴";
+			break;
+		case 1:
+			strStatus = "가입";
+			break;
+		case 2:
+			strStatus = "차단";
+			break;
+		default:
+			break;
+		}
+		return strStatus;
+	}
+	
 
 	private Transaction() {}
 	

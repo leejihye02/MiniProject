@@ -15,4 +15,7 @@ public interface CompanyDAO {
 
 	int cpInfoUpdate(CompanyDTO companyDTO);
 
+	// 기업형태별 회사 통계
+	Map<String, Integer> getBusinessTypeRatio();
+
 }
