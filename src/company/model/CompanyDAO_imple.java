@@ -4,9 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
+//import java.util.Scanner;
+
 
 import common.ProjectDBConnection;
 import company.domain.CompanyDTO;
@@ -83,11 +86,7 @@ public class CompanyDAO_imple implements CompanyDAO {
 		
 		try {
 			String sql = " SELECT company_id, passwd, email, name, business_no, address, tel, industry,  "
-					+ "       business_type, "
-					+ "       DECODE(business_type,  "
-					+ "              0, '대기업',  "
-					+ "              1, '중견기업',  "
-					+ "              2, '중소기업') AS businessTypeStr "
+					+ "       business_type "
 					+ " FROM tbl_company  "
 					+ " WHERE status = 1  "
 					+ "  AND company_id = ?  "
@@ -113,7 +112,6 @@ public class CompanyDAO_imple implements CompanyDAO {
 		company.setBusinessType(rs.getInt("business_type"));
 		company.setTel(rs.getString("tel"));
 		company.setIndustry(rs.getString("industry"));
-		company.setBusinessTypeStr(rs.getString("businessTypeStr"));
 		}
 		
 		}catch(SQLException e) {
@@ -173,6 +171,167 @@ public class CompanyDAO_imple implements CompanyDAO {
 
 
 
+	//회사명으로 조회
+	@Override
+	public List<CompanyDTO> companyNameList(String companyName) {
+	    List<CompanyDTO> companyNameList = new ArrayList<>();
+	    
+	    try {
+	        String sql = " select name, industry, business_no, address, "
+	                   + " case when progress is null then '채용없음' else progress end as progress "
+	                   + " from ("
+	                   + "    select name, industry, business_no, address, company_Id "
+	                   + "    from tbl_company "
+	                   + "    where upper(name) like  upper(?) "
+	                   + " ) C "
+	                   + " LEFT JOIN "
+	                   + " ( "
+	                   + "    select case when max(deadlineday) > sysdate then '진행중' else '마감' end as progress, fk_company_id "
+	                   + "    from tbl_recruitment "
+	                   + "    group by fk_company_id "
+	                   + " ) R "
+	                   + " ON fk_company_id = company_Id ";
+	        
+	        pstmt = conn.prepareStatement(sql);
+	        
+	        pstmt.setString(1, "%"+companyName+"%");  // 첫 번째 파라미터
+	        
+	        rs = pstmt.executeQuery();
+	        
+	        while (rs.next()) {  // 여러 행을 처리할 수 있도록 변경
+	            CompanyDTO companyDTO = new CompanyDTO();
+	            
+	            companyDTO.setName(rs.getString("name"));
+	            companyDTO.setIndustry(rs.getString("industry"));
+	            companyDTO.setBusinessNo(rs.getString("business_no"));
+	            companyDTO.setAddress(rs.getString("address"));
+	            companyDTO.setProgress(rs.getString("progress"));
+	            
+	            companyNameList.add(companyDTO);  // 리스트에 추가
+	        }
+	        
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        close();
+	    }
+	    
+	    return companyNameList;  // 리스트 반환
+	}
+
+
+	
+
+
+
+
+	//업종별 검색
+
+	@Override
+	public List<CompanyDTO> companyIndustryList(String industry) {
+		List<CompanyDTO>companyIndustryList = new ArrayList<>();
+		
+		try {
+			String sql = " select name, industry, business_no, address, "
+					+ " case when progress is null then '채용없음' else progress end as progress "
+					+ " from ("
+					+ " select  name, industry, business_no, address, company_Id "
+					+ " from tbl_company "
+					+ " where  upper(industry) like upper(?) "
+					+ " )C "
+					+ " LEFT JOIN "
+					+ " ( "
+					+ " select case when max(deadlineday) > sysdate then '진행중' else '마감' end as progress, fk_company_id "
+					+ " from tbl_recruitment "
+					+ " group by fk_company_id "
+					+ " )R "
+					+ " ON fk_company_id = company_Id ";
+		
+		pstmt=conn.prepareStatement(sql);
+
+		
+		pstmt.setString(1, "%"+industry+"%");
+
+		
+		rs = pstmt.executeQuery();
+		while(rs.next()) {
+			CompanyDTO companyDTO = new CompanyDTO();
+			
+			companyDTO.setName(rs.getString("name"));
+			companyDTO.setIndustry(rs.getString("industry"));
+			companyDTO.setBusinessNo(rs.getString("business_no"));
+			companyDTO.setAddress(rs.getString("address"));
+			companyDTO.setProgress(rs.getString("progress"));
+			
+			companyIndustryList.add(companyDTO); 
+		}
+		
+		
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			close();
+		}
+		
+		return  companyIndustryList;
+	}
+
+
+
+
+
+	//지역별 검색
+	@Override
+	public List<CompanyDTO> companyAddressList(String address) {
+	
+		List<CompanyDTO>  companyAddressList = new ArrayList<>();
+		
+		try {
+			String sql = " select name, industry, business_no, address, "
+					+ " case when progress is null then '채용없음' else progress end as progress "
+					+ " from ( "
+					+ " select  name, industry, business_no, address, company_Id "
+					+ " from tbl_company "
+					+ " where upper(address) like upper(?) "
+					+ " )C "
+					+ " LEFT JOIN "
+					+ " ( "
+					+ " select case when max(deadlineday) > sysdate then '진행중' else '마감' end as progress, fk_company_id "
+					+ " from tbl_recruitment "
+					+ " group by fk_company_id "
+					+ " )R "
+					+ " ON fk_company_id = company_Id ";
+		pstmt=conn.prepareStatement(sql);
+
+		
+		pstmt.setString(1, "%"+address+"%");
+		
+		
+		rs = pstmt.executeQuery();
+		while(rs.next()) {
+			
+			CompanyDTO companyDTO = new CompanyDTO();
+			
+			companyDTO.setName(rs.getString("name"));
+			companyDTO.setIndustry(rs.getString("industry"));
+			companyDTO.setBusinessNo(rs.getString("business_no"));
+			companyDTO.setAddress(rs.getString("address"));
+			companyDTO.setProgress(rs.getString("progress"));
+			
+			 companyAddressList.add(companyDTO); 
+		}
+		
+		
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			close();
+		}
+		
+		return  companyAddressList ;
+	}
+
+
 	// 기업형태별 회사 통계
 	@Override
 	public Map<String, Integer> getBusinessTypeRatio() {
@@ -201,13 +360,8 @@ public class CompanyDAO_imple implements CompanyDAO {
 		} finally {
 			close();
 		}
-		
+	
 		return map;
 	}
-	
-
-	
-
-	
 
 }
